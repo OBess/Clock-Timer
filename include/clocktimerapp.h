@@ -1,13 +1,13 @@
 #ifndef CLOCKTIMERAPP_H
 #define CLOCKTIMERAPP_H
 
-#include <QMainWindow>
+#include <QWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ClockTimerApp; }
 QT_END_NAMESPACE
 
-class ClockTimerApp : public QMainWindow
+class ClockTimerApp : public QWidget
 {
     Q_OBJECT
 

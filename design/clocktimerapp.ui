@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ClockTimerApp</class>
- <widget class="QMainWindow" name="ClockTimerApp">
+ <widget class="QWidget" name="ClockTimerApp">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>ClockTimerApp</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
-  <widget class="QMenuBar" name="menubar"/>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
