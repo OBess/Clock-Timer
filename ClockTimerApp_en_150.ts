@@ -5,6 +5,7 @@
     <name>ClockTimerApp</name>
     <message>
         <location filename="clocktimerapp.ui" line="14"/>
+        <location filename="build/ClockTimerApp_autogen/include_Debug/ui_clocktimerapp.h" line="50"/>
         <source>ClockTimerApp</source>
         <translation type="unfinished"></translation>
     </message>
