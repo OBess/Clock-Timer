@@ -16,6 +16,9 @@ public:
     ~ClockTimerApp();
 
 private:
+    void setupUi();
+    void setupConnections();
+
     Ui::ClockTimerApp *ui;
 };
 #endif // CLOCKTIMERAPP_H
