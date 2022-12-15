@@ -17,32 +17,14 @@ namespace Ui
 
     public:
         ClockWidget(QWidget *parent = nullptr)
-            : QWidget(parent), _pen(Qt::black, 3)
+            : QWidget(parent), _pen(Qt::black, 1)
         {
             setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+            setMinimumWidth(300);
+            setMinimumHeight(300);
         }
 
         virtual ~ClockWidget() override = default;
-
-        inline void setPen(const QColor &color) noexcept
-        {
-            _pen = QPen(color);
-        }
-
-        inline void setPen(QPen &&pen) noexcept
-        {
-            _pen = std::move(pen);
-        }
-
-        inline void setPen(Qt::PenStyle style) noexcept
-        {
-            _pen = QPen(style);
-        }
-
-        inline void setWidth(int width) noexcept
-        {
-            _pen.setWidth(width);
-        }
 
         inline void setColor(const QColor &color) noexcept
         {
@@ -53,12 +35,17 @@ namespace Ui
         virtual void paintEvent(QPaintEvent *event) override
         {
             QPainter painter(this);
+
+            _pen.setWidth(5);
+            _pen.setColor(QColor("#3399FF"));
+
             painter.setPen(_pen);
 
-            QRect size = event->rect();
+            QPoint center{width() / 2, height() / 2};
+            int radius = center.x() * 0.8;
 
-            painter.drawEllipse(0, 0, size.height() * 0.6, size.height() * 0.6);
-            painter.drawRect(size);
+            painter.drawEllipse(center.x() - radius, center.y() - radius - center.y() * 0.1,
+                                radius * 2, radius * 2);
         }
 
     private:

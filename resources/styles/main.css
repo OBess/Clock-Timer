@@ -1,0 +1,33 @@
+QWidget {
+  background: qlineargradient(
+    x1: 0,
+    y1: 0,
+    x2: 1,
+    y2: -0.3,
+    stop: 0.0 #020024,
+    stop: 0.6 #090979,
+    stop: 1 #02027a
+  );
+
+  color: white;
+}
+
+#historyTable, #timer, #historyLbl {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+QPushButton {
+  background-color: #020024;
+
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: #020024;
+
+  font-weight: bold;
+}
+
+QPushButton:hover {
+  background-color: white;
+  color: #020024;
+}

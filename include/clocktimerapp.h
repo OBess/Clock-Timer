@@ -8,6 +8,7 @@ namespace Ui
 {
     class ClockTimerApp;
     class ClockWidget;
+    class HoverButton;
 }
 QT_END_NAMESPACE
 
@@ -22,8 +23,15 @@ public:
 private:
     void setupUi();
     void setupConnections();
+    void setupStyle();
 
-    Ui::ClockWidget *_clockWidget;
-    Ui::ClockTimerApp *ui;
+    Ui::HoverButton *buildBtn(const char *text);
+
+    Ui::ClockTimerApp *ui = nullptr;
+
+    Ui::ClockWidget *_clockWidget = nullptr;
+    Ui::HoverButton *_startBtn = nullptr;
+    Ui::HoverButton *_restartBtn = nullptr;
+    Ui::HoverButton *_clearBtn = nullptr;
 };
 #endif // CLOCKTIMERAPP_H

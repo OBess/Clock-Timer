@@ -7,6 +7,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
+#include "hoverbutton.h"
 #include "timedrawwidget.h"
 
 ClockTimerApp::ClockTimerApp(QWidget *parent)
@@ -24,16 +25,18 @@ ClockTimerApp::~ClockTimerApp()
 
 inline void ClockTimerApp::setupUi()
 {
+    _startBtn = buildBtn("Start");
+    _restartBtn = buildBtn("Restart");
+    _clearBtn = buildBtn("Clear");
+
     // Create sub-horizontal layout for history's clear button
     auto *horLayoutHistoryClearBtn = new QHBoxLayout;
 
-    ui->clearBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
     horLayoutHistoryClearBtn->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    horLayoutHistoryClearBtn->addWidget(ui->clearBtn);
+    horLayoutHistoryClearBtn->addWidget(_clearBtn);
     horLayoutHistoryClearBtn->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-    horLayoutHistoryClearBtn->setAlignment(ui->clearBtn, Qt::AlignCenter);
+    horLayoutHistoryClearBtn->setAlignment(_clearBtn, Qt::AlignCenter);
 
     // Create vertical layout for history component
     auto *verLayoutHistory = new QVBoxLayout;
@@ -47,16 +50,13 @@ inline void ClockTimerApp::setupUi()
 
     _clockWidget = new Ui::ClockWidget(this);
 
-    ui->startBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    ui->restartBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
     verLayoutClockTimer->addWidget(ui->timer);
     verLayoutClockTimer->addWidget(_clockWidget);
-    verLayoutClockTimer->addWidget(ui->startBtn);
-    verLayoutClockTimer->addWidget(ui->restartBtn);
+    verLayoutClockTimer->addWidget(_startBtn);
+    verLayoutClockTimer->addWidget(_restartBtn);
 
-    verLayoutClockTimer->setAlignment(ui->startBtn, Qt::AlignCenter);
-    verLayoutClockTimer->setAlignment(ui->restartBtn, Qt::AlignCenter);
+    verLayoutClockTimer->setAlignment(_startBtn, Qt::AlignCenter);
+    verLayoutClockTimer->setAlignment(_restartBtn, Qt::AlignCenter);
     verLayoutClockTimer->setContentsMargins(0, 0, 0, 0);
 
     // Create horizontal layout for history and clock/timer components
@@ -84,9 +84,38 @@ inline void ClockTimerApp::setupUi()
     verLayoutMain->addLayout(horLayoutForComp);
 
     setLayout(verLayoutMain);
+
+    setupStyle();
 }
 
 inline void ClockTimerApp::setupConnections()
 {
-    
+}
+
+inline void ClockTimerApp::setupStyle()
+{
+    if (QFile file("://styles/main.css"); file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        if (file.size() == 0)
+            return;
+
+        QTextStream in(&file);
+        setStyleSheet(in.readAll());
+    }
+}
+
+Ui::HoverButton *ClockTimerApp::buildBtn(const char *text)
+{
+    Ui::HoverButton *newBtn = new Ui::HoverButton(this);
+
+    newBtn->setFixedSize({251, 51});
+    newBtn->setText(text);
+
+    QFont font = newBtn->font();
+    font.setPointSize(12);
+    newBtn->setFont(font);
+
+    newBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    return newBtn;
 }
