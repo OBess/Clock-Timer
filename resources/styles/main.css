@@ -9,11 +9,16 @@ QWidget {
   background-color: #00000000;
 }
 
+QLineEdit {
+  border: 1px solid white;
+  border-radius: 2px;
+}
+
 QPushButton {
   background-color: #121212;
 
   border: 1px solid #121212;
-  border-radius: 5px;
+  border-radius: 2px;
 
   font-weight: bold;
 }
@@ -33,7 +38,7 @@ QLabel#historyLbl {
 
 QTableView {
   border: 1px solid #888;
-  border-radius: 5px;
+  border-radius: 2px;
 }
 
 QTableView::item:focus {

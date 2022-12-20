@@ -1,23 +1,28 @@
 #include "clocktimerapp.h"
 #include "./ui_clocktimerapp.h"
 
-// TODO:: Delete
-#include <QDebug>
-
 #include <QDate>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QTextStream>
 #include <QVBoxLayout>
 
 #include "historymodel.h"
+#include "intrangevalidator.h"
 #include "timedrawwidget.h"
 
 ClockTimerApp::ClockTimerApp(QWidget *parent)
     : QWidget(parent), ui(new Ui::ClockTimerApp)
 {
+    _clock = new QTimer(this);
+
     ui->setupUi(this);
     setupUi();
     setupConnections();
+
+    using namespace std::chrono_literals;
+    _clock->setInterval(100ms);
+    _clock->start();
 }
 
 ClockTimerApp::~ClockTimerApp()
@@ -60,12 +65,25 @@ inline void ClockTimerApp::setupUi()
     verLayoutHistory->addWidget(ui->historyTable);
     verLayoutHistory->addLayout(horLayoutHistoryClearBtn);
 
+    // Create digital clock
+    auto *horLayoutDigitalTimer = new QHBoxLayout;
+
+    horLayoutDigitalTimer->addWidget(ui->le_hour);
+    horLayoutDigitalTimer->addWidget(ui->sep1);
+    horLayoutDigitalTimer->addWidget(ui->le_minute);
+    horLayoutDigitalTimer->addWidget(ui->sep2);
+    horLayoutDigitalTimer->addWidget(ui->le_second);
+
+    ui->le_hour->setValidator(new IntRangeValidator(0, 24, this));
+    ui->le_minute->setValidator(new IntRangeValidator(0, 60, this));
+    ui->le_second->setValidator(new IntRangeValidator(0, 60, this));
+
     // Create vertical layout for a clock, a timer and control buttons
     auto *verLayoutClockTimer = new QVBoxLayout;
 
     _clockWidget = new Ui::ClockWidget(this);
 
-    verLayoutClockTimer->addWidget(ui->timer);
+    verLayoutClockTimer->addLayout(horLayoutDigitalTimer);
     verLayoutClockTimer->addWidget(_clockWidget);
     verLayoutClockTimer->addWidget(_startBtn);
     verLayoutClockTimer->addWidget(_restartBtn);
@@ -107,6 +125,7 @@ inline void ClockTimerApp::setupConnections()
 {
     QObject::connect(_clearBtn, &QPushButton::clicked, this, &ClockTimerApp::clearAll);
     QObject::connect(_startBtn, &QPushButton::clicked, this, &ClockTimerApp::insertInterval);
+    QObject::connect(_clock, &QTimer::timeout, this, &ClockTimerApp::updateEverySecond);
 }
 
 inline void ClockTimerApp::setupStyle()
@@ -151,4 +170,15 @@ void ClockTimerApp::insertInterval()
                            QDateTime::currentDateTime().toString());
     _historyModel->setData(_historyModel->index(_historyModel->rowCount() - 1, 1),
                            "00:00:00");
+}
+
+void ClockTimerApp::updateEverySecond()
+{
+    _clockWidget->updateEverySecond();
+
+    const QTime currentTime = QTime::currentTime();
+
+    ui->le_hour->setText(QString::number(currentTime.hour()));
+    ui->le_minute->setText(QString::number(currentTime.minute()));
+    ui->le_second->setText(QString::number(currentTime.second()));
 }

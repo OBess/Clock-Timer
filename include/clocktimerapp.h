@@ -1,6 +1,7 @@
 #ifndef CLOCKTIMERAPP_H
 #define CLOCKTIMERAPP_H
 
+#include <QTimer>
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -25,6 +26,7 @@ public:
 private slots:
     void clearAll();
     void insertInterval();
+    void updateEverySecond();
 
 private:
     void setupUi();
@@ -41,5 +43,7 @@ private:
     QPushButton *_clearBtn = nullptr;
 
     HistoryModel *_historyModel = nullptr;
+
+    QTimer* _clock = nullptr;
 };
 #endif // CLOCKTIMERAPP_H
