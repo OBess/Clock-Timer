@@ -4,8 +4,6 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
-class QPushButton;
-
 namespace Ui
 {
     class ClockTimerApp;
@@ -13,7 +11,7 @@ namespace Ui
 }
 
 class HistoryModel;
-
+class QPushButton;
 QT_END_NAMESPACE
 
 class ClockTimerApp : public QWidget

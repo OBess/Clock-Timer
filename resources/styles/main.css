@@ -39,3 +39,10 @@ QTableView {
 QTableView::item:focus {
   border: none;
 }
+
+QTableView::item:selected {
+  border: none;
+  color: #121212;
+  background-color: white;
+}
+
