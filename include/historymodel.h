@@ -17,78 +17,136 @@ public:
 
     ~HistoryModel() override = default;
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const override
     {
         return _items.size();
     }
 
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override
+    Q_INVOKABLE int columnCount(const QModelIndex &parent = QModelIndex()) const override
     {
         return column;
     }
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    Q_INVOKABLE QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
     {
+        if (index.isValid() == false)
+            return {};
+        else if (index.row() >= _items.size() || index.row() < 0)
+            return {};
+
         if (role == Qt::DisplayRole)
         {
-            return _items[index.row()][index.column()];
+            const auto &item = _items[index.row()];
+
+            switch (index.column())
+            {
+            case 0:
+                return item.datetime;
+                break;
+
+            case 1:
+                return item.interval;
+                break;
+
+            default:
+                return {};
+                break;
+            }
+        }
+        else if (role == Qt::TextAlignmentRole)
+        {
+            return Qt::AlignCenter;
+        }
+        else if (role == Qt::ForegroundRole)
+        {
+            switch (index.column())
+            {
+            case 0:
+                return QBrush(Qt::white);
+                break;
+
+            case 1:
+                return QBrush("#ff8800");
+                break;
+
+            default:
+                return {};
+                break;
+            }
         }
 
         return {};
     }
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
+    Q_INVOKABLE QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
     {
         return {};
     }
 
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override
     {
-        if (count == 0)
+        if (row < 0 || count <= 0)
             return false;
 
         beginInsertRows(parent, row, row + count - 1);
 
-        _items.push_back({});
+        for (int i = row; i < row + count; ++i)
+        {
+            _items.insert(i, {});
+        }
 
         endInsertRows();
 
         return true;
     }
 
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override
     {
-        if (count == 0)
+        if (row < 0 || count <= 0)
             return false;
 
         beginRemoveRows(parent, row, row + count - 1);
 
-        _items.erase(std::next(std::begin(_items), row), std::next(std::begin(_items), row + count - 1));
+        _items.erase(std::next(std::begin(_items), row), std::next(std::begin(_items), row + count));
 
         endRemoveRows();
 
         return true;
     }
 
+    Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
+    {
+        if (index.isValid() == false || value.isValid() == false)
+            return false;
+        else if (role != Qt::EditRole)
+            return false;
+
+        auto &item = _items[index.row()];
+
+        switch (index.column())
+        {
+        case 0:
+            item.datetime = value.toString();
+            break;
+
+        case 1:
+            item.interval = value.toString();
+            break;
+
+        default:
+            return false;
+            break;
+        }
+
+        return true;
+    }
+
 private:
-    const int column = 3;
+    const int column = 2;
 
     struct Item
     {
-        QString data, time, interval;
-        const QString empty{};
-
-        constexpr const QString &operator[](size_t index) const noexcept
-        {
-            if (index == 0)
-                return data;
-            else if (index == 1)
-                return time;
-            else if (index == 2)
-                return interval;
-            else
-                return empty;
-        }
+        QString datetime, interval;
     };
 
     QList<Item> _items;

@@ -4,6 +4,7 @@
 // TODO:: Delete
 #include <QDebug>
 
+#include <QDate>
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -33,6 +34,10 @@ inline void ClockTimerApp::setupUi()
 
     //
     _historyModel = new HistoryModel(this);
+
+    ui->historyTable->setMinimumWidth(340);
+    ui->historyTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->historyTable->horizontalHeader()->setStretchLastSection(true);
 
     ui->historyTable->verticalHeader()->hide();
     ui->historyTable->horizontalHeader()->hide();
@@ -100,8 +105,8 @@ inline void ClockTimerApp::setupUi()
 
 inline void ClockTimerApp::setupConnections()
 {
-    QObject::connect(_clearBtn, &QPushButton::released, this, &ClockTimerApp::clearAll);
-    QObject::connect(_startBtn, &QPushButton::released, this, &ClockTimerApp::insertInterval);
+    QObject::connect(_clearBtn, &QPushButton::clicked, this, &ClockTimerApp::clearAll);
+    QObject::connect(_startBtn, &QPushButton::clicked, this, &ClockTimerApp::insertInterval);
 }
 
 inline void ClockTimerApp::setupStyle()
@@ -141,4 +146,9 @@ void ClockTimerApp::clearAll()
 void ClockTimerApp::insertInterval()
 {
     _historyModel->insertRow(_historyModel->rowCount());
+
+    _historyModel->setData(_historyModel->index(_historyModel->rowCount() - 1, 0),
+                           QDateTime::currentDateTime().toString());
+    _historyModel->setData(_historyModel->index(_historyModel->rowCount() - 1, 1),
+                           "00:00:00");
 }

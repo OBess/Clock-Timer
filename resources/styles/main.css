@@ -12,10 +12,8 @@ QWidget {
 QPushButton {
   background-color: #121212;
 
-  border-width: 1px;
-  border-style: solid;
+  border: 1px solid #121212;
   border-radius: 5px;
-  border-color: #020024;
 
   font-weight: bold;
 }
@@ -31,4 +29,13 @@ QPushButton:pressed {
 
 QLabel#historyLbl {
   color: #888;
+}
+
+QTableView {
+  border: 1px solid #888;
+  border-radius: 5px;
+}
+
+QTableView::item:focus {
+  border: none;
 }
