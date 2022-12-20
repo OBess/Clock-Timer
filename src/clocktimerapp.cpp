@@ -5,9 +5,10 @@
 #include <QDebug>
 
 #include <QHBoxLayout>
+#include <QPushButton>
 #include <QVBoxLayout>
 
-#include "hoverbutton.h"
+#include "historymodel.h"
 #include "timedrawwidget.h"
 
 ClockTimerApp::ClockTimerApp(QWidget *parent)
@@ -25,9 +26,18 @@ ClockTimerApp::~ClockTimerApp()
 
 inline void ClockTimerApp::setupUi()
 {
-    _startBtn = buildBtn("Start");
-    _restartBtn = buildBtn("Restart");
-    _clearBtn = buildBtn("Clear");
+    //
+    _startBtn = buildBtn("Start", this);
+    _restartBtn = buildBtn("Restart", this);
+    _clearBtn = buildBtn("Clear", this);
+
+    //
+    _historyModel = new HistoryModel(this);
+
+    ui->historyTable->verticalHeader()->hide();
+    ui->historyTable->horizontalHeader()->hide();
+
+    ui->historyTable->setModel(_historyModel);
 
     // Create sub-horizontal layout for history's clear button
     auto *horLayoutHistoryClearBtn = new QHBoxLayout;
@@ -90,6 +100,8 @@ inline void ClockTimerApp::setupUi()
 
 inline void ClockTimerApp::setupConnections()
 {
+    QObject::connect(_clearBtn, &QPushButton::released, this, &ClockTimerApp::clearAll);
+    QObject::connect(_startBtn, &QPushButton::released, this, &ClockTimerApp::insertInterval);
 }
 
 inline void ClockTimerApp::setupStyle()
@@ -104,9 +116,9 @@ inline void ClockTimerApp::setupStyle()
     }
 }
 
-Ui::HoverButton *ClockTimerApp::buildBtn(const char *text)
+QPushButton *ClockTimerApp::buildBtn(const char *text, QWidget *parent)
 {
-    Ui::HoverButton *newBtn = new Ui::HoverButton(this);
+    QPushButton *newBtn = new QPushButton(parent);
 
     newBtn->setFixedSize({251, 51});
     newBtn->setText(text);
@@ -115,7 +127,18 @@ Ui::HoverButton *ClockTimerApp::buildBtn(const char *text)
     font.setPointSize(12);
     newBtn->setFont(font);
 
+    newBtn->setCursor(QCursor(Qt::PointingHandCursor));
     newBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     return newBtn;
+}
+
+void ClockTimerApp::clearAll()
+{
+    _historyModel->removeRows(0, _historyModel->rowCount());
+}
+
+void ClockTimerApp::insertInterval()
+{
+    _historyModel->insertRow(_historyModel->rowCount());
 }

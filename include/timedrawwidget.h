@@ -17,39 +17,51 @@ namespace Ui
 
     public:
         ClockWidget(QWidget *parent = nullptr)
-            : QWidget(parent), _pen(Qt::black, 1)
+            : QWidget(parent)
         {
             setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             setMinimumWidth(300);
             setMinimumHeight(300);
         }
 
-        virtual ~ClockWidget() override = default;
+        ~ClockWidget() override = default;
 
-        inline void setColor(const QColor &color) noexcept
+    private:
+        void paintEvent(QPaintEvent *event) override
         {
-            _pen.setColor(color);
-        }
-
-    protected:
-        virtual void paintEvent(QPaintEvent *event) override
-        {
-            QPainter painter(this);
-
-            _pen.setWidth(5);
-            _pen.setColor(QColor("#3399FF"));
-
-            painter.setPen(_pen);
+            constexpr int penWidth = 10;
 
             QPoint center{width() / 2, height() / 2};
             int radius = center.x() * 0.8;
 
-            painter.drawEllipse(center.x() - radius, center.y() - radius - center.y() * 0.1,
+            QPainter painter(this);
+            QPen pen(Qt::black, 1);
+
+            // Draw divisions
+            pen.setWidth(penWidth / 3);
+            pen.setColor(QColor("#fff"));
+            painter.setPen(pen);
+
+            constexpr int divisionsNumber = 60;
+            constexpr double angle = 360 / divisionsNumber;
+
+            QPoint startDivision(center.x(), center.y() - radius + center.y() * 0.15);
+            QPoint endDivision(center.x(), center.y() - radius);
+
+            for (int i = 0; i < divisionsNumber; ++i)
+            {
+                painter.drawLine(startDivision, endDivision);
+                // painter.rotate(angle);
+            }
+
+            // Draw circle
+            pen.setWidth(penWidth);
+            pen.setColor(QColor("#888"));
+            painter.setPen(pen);
+
+            painter.drawEllipse(center.x() - radius, center.y() - radius,
                                 radius * 2, radius * 2);
         }
-
-    private:
-        QPen _pen;
     };
 } // namespace Ui
 QT_END_NAMESPACE

@@ -4,12 +4,16 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
+class QPushButton;
+
 namespace Ui
 {
     class ClockTimerApp;
     class ClockWidget;
-    class HoverButton;
 }
+
+class HistoryModel;
+
 QT_END_NAMESPACE
 
 class ClockTimerApp : public QWidget
@@ -20,18 +24,24 @@ public:
     ClockTimerApp(QWidget *parent = nullptr);
     ~ClockTimerApp();
 
+private slots:
+    void clearAll();
+    void insertInterval();
+
 private:
     void setupUi();
     void setupConnections();
     void setupStyle();
 
-    Ui::HoverButton *buildBtn(const char *text);
+    static QPushButton *buildBtn(const char *text, QWidget *parent);
 
     Ui::ClockTimerApp *ui = nullptr;
 
     Ui::ClockWidget *_clockWidget = nullptr;
-    Ui::HoverButton *_startBtn = nullptr;
-    Ui::HoverButton *_restartBtn = nullptr;
-    Ui::HoverButton *_clearBtn = nullptr;
+    QPushButton *_startBtn = nullptr;
+    QPushButton *_restartBtn = nullptr;
+    QPushButton *_clearBtn = nullptr;
+
+    HistoryModel *_historyModel = nullptr;
 };
 #endif // CLOCKTIMERAPP_H
