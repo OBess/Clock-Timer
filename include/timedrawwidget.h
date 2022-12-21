@@ -17,22 +17,22 @@ namespace Ui
     namespace math
     {
 
-        static inline QPointF rotate(QPointF point, float angle, QPointF center = QPointF(0, 0))
+        static inline QPointF rotate(QPointF point, float angle, QPointF _center = QPointF(0, 0))
         {
             float s = std::sin(angle);
             float c = std::cos(angle);
 
             // translate point back to origin:
-            point.setX(point.x() - center.x());
-            point.setY(point.y() - center.y());
+            point.setX(point.x() - _center.x());
+            point.setY(point.y() - _center.y());
 
             // rotate point
             float xnew = point.x() * c - point.y() * s;
             float ynew = point.x() * s + point.y() * c;
 
             // translate point back:
-            point.setX(xnew + center.x());
-            point.setY(ynew + center.y());
+            point.setX(xnew + _center.x());
+            point.setY(ynew + _center.y());
 
             return point;
         }
@@ -60,14 +60,23 @@ namespace Ui
         }
 
     private:
-        void paintEvent(QPaintEvent *event) override
+        void mouseMoveEvent(QMouseEvent *event) override
+        {
+            const QPointF mainVec(QPointF(_center.x(), _center.y() - _radius) - _center);
+            const QPointF mouseVec(event->localPos() - _center);
+
+            _mouseAngel = -vecProd(mainVec, mouseVec);
+        }
+
+        void paintEvent([[maybe_unused]] QPaintEvent *event) override
         {
             constexpr int penWidth = 10;
 
-            QPointF center(width() / 2, height() / 2);
-            int radius = center.x() * 0.8;
+            _center = QPointF(width() / 2, height() / 2);
+            _radius = _center.x() * 0.8;
 
             QPainter painter(this);
+            painter.setRenderHint(QPainter::Antialiasing, true);
             painter.setFont(QFont("Consolas", width() / 30));
 
             QPen pen(Qt::black, 1);
@@ -81,11 +90,11 @@ namespace Ui
             constexpr int divisionsNumber = 60;
             constexpr float angle = qDegreesToRadians(360.0f / static_cast<float>(divisionsNumber));
 
-            QPointF startDivision1(center.x(), center.y() - radius + center.y() * 0.12);
-            QPointF startDivision2(center.x(), center.y() - radius + center.y() * 0.07);
-            QPointF endDivision(center.x(), center.y() - radius);
+            QPointF startDivision1(_center.x(), _center.y() - _radius + _center.y() * 0.12);
+            QPointF startDivision2(_center.x(), _center.y() - _radius + _center.y() * 0.07);
+            QPointF endDivision(_center.x(), _center.y() - _radius);
 
-            QPointF textPosition(center.x() - (width() / 70.f), center.y() - radius + center.y() * 0.20);
+            QPointF textPosition(_center.x(), _center.y() - _radius + _center.y() * 0.20);
 
             for (int i = 0; i < divisionsNumber; ++i)
             {
@@ -109,18 +118,18 @@ namespace Ui
                     painter.drawLine(startDivision2, endDivision);
                 }
 
-                endDivision = math::rotate(endDivision, angle, center);
-                startDivision1 = math::rotate(startDivision1, angle, center);
-                startDivision2 = math::rotate(startDivision2, angle, center);
-                textPosition = math::rotate(textPosition, angle, center);
+                endDivision = math::rotate(endDivision, angle, _center);
+                startDivision1 = math::rotate(startDivision1, angle, _center);
+                startDivision2 = math::rotate(startDivision2, angle, _center);
+                textPosition = math::rotate(textPosition, angle, _center);
             }
 
             // Draw circle
             pen.setWidth(penWidth);
             painter.setPen(pen);
 
-            painter.drawEllipse(center.x() - radius, center.y() - radius,
-                                radius * 2, radius * 2);
+            painter.drawEllipse(_center.x() - _radius, _center.y() - _radius,
+                                _radius * 2, _radius * 2);
 
             const QTime currentTime = QTime::currentTime();
 
@@ -129,23 +138,81 @@ namespace Ui
             pen.setColor(Qt::white);
             painter.setPen(pen);
 
-            painter.drawLine(center, math::rotate({center.x(), center.y() - radius + center.y() * 0.15},
-                                                  angle * currentTime.second(), center));
+            painter.drawLine(_center, math::rotate({_center.x(), _center.y() - _radius + _center.y() * 0.15},
+                                                  angle * currentTime.second(), _center));
 
             // Draw minutes
             pen.setWidth(penWidth / 3);
             painter.setPen(pen);
 
-            painter.drawLine(center, math::rotate({center.x(), center.y() - radius + center.y() * 0.25},
-                                                  angle * currentTime.minute(), center));
+            painter.drawLine(_center, math::rotate({_center.x(), _center.y() - _radius + _center.y() * 0.25},
+                                                  angle * currentTime.minute(), _center));
 
             // Draw hours
             pen.setWidth(penWidth / 2);
             painter.setPen(pen);
 
-            painter.drawLine(center, math::rotate({center.x(), center.y() - radius + center.y() * 0.55},
-                                                  angle * (currentTime.hour() % 12) * 5, center));
+            painter.drawLine(_center, math::rotate({_center.x(), _center.y() - _radius + _center.y() * 0.55},
+                                                  angle * (currentTime.hour() % 12) * 5, _center));
+
+            // Draw arc
+            const QRectF rect(_center.x() - _radius, _center.y() - _radius, _radius + _radius, _radius + _radius);
+            const float mapped = map(_mouseAngel, 0, 6.28318531f, 0, 5760.f);
+
+            pen.setWidth(penWidth);
+            pen.setColor(Qt::white);
+            pen.setCapStyle(Qt::FlatCap);
+
+            painter.setPen(pen);
+
+            painter.drawArc(rect, 1440, mapped);
+
+            // Draw shadow arc
+            QLinearGradient shadow(0, 0, 100, 0);
+            shadow.setColorAt(0.0, QColor(255, 255, 255, 255));
+            shadow.setColorAt(1.0, QColor(255, 255, 255, 20));
+
+            QPen shadowPen(shadow, penWidth * 3);
+
+            painter.setPen(shadowPen);
+
+            painter.drawArc(rect, 1440, mapped);
+
+            for (unsigned i = 2; i < 5; ++i)
+            {
+                pen.setWidth(penWidth * i);
+                pen.setColor(QColor(255, 255, 255, 20 * (5 - i)));
+                pen.setCapStyle(Qt::FlatCap);
+
+                painter.setPen(pen);
+
+                painter.drawArc(rect, 1440, mapped);
+            }
         }
+
+    private:
+        static constexpr float map(float x, float in_min, float in_max, float out_min, float out_max) noexcept
+        {
+          return out_min + ((out_max - out_min) / (in_max - in_min)) * (x - in_min);
+        }
+
+        static inline float vecProd(const QPointF& lhs, const QPointF& rhs) noexcept
+        {
+            float angle = std::atan2(lhs.x() + rhs.y() - lhs.y() * rhs.x(),
+                                           lhs.x() + rhs.x() + lhs.y() * rhs.y());
+
+            angle = angle * qDegreesToRadians(360.f) / (2 * M_PI);
+
+            if (angle < 0.0f)
+                return angle + qDegreesToRadians(360.f);
+            else
+                return angle;
+        }
+
+    private:
+        QPointF _center;
+        float _radius = 0;
+        float _mouseAngel = 0;
     };
 
 } // namespace Ui
