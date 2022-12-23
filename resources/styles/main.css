@@ -2,19 +2,15 @@ QWidget {
   background: #121212;
   color: white;
   border: none;
+  border-radius: 2px;
 }
 
 QLineEdit {
   border: 1px solid white;
-  border-radius: 2px;
 }
 
 QPushButton {
-  background-color: #121212;
-
   border: 1px solid #121212;
-  border-radius: 2px;
-
   font-weight: bold;
 }
 
@@ -34,15 +30,9 @@ QLabel#lbl_history {
 
 QTableView {
   border: 1px solid #888;
-  border-radius: 2px;
-}
-
-QTableView::item:focus {
-  border: none;
 }
 
 QTableView::item:selected {
-  border: none;
   color: #121212;
   background-color: white;
 }

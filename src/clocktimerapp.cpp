@@ -19,8 +19,6 @@ ClockTimerApp::ClockTimerApp(QWidget *parent)
       _iniFile("settings.ini")
 {
     ui->setupUi(this);
-    setupUi();
-    setupConnections();
 
     _clock = new QTimer(this);
     _timer = new QTimer(this);
@@ -28,6 +26,8 @@ ClockTimerApp::ClockTimerApp(QWidget *parent)
     _clock->setInterval(100);
     _clock->start();
 
+    setupUi();
+    setupConnections();
     setupApp();
 }
 
