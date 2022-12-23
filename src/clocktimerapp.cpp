@@ -42,105 +42,51 @@ ClockTimerApp::~ClockTimerApp()
 inline void ClockTimerApp::setupUi()
 {
     //
-    _startBtn = buildBtn("Start", this);
-    _stopBtn = buildBtn("Stop", this);
-    _restartBtn = buildBtn("Restart", this);
-    _clearBtn = buildBtn("Clear", this);
+    ui->btn_stop->hide();
+
+    //
+    ui->table_history->setMinimumWidth(340);
+    ui->table_history->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->table_history->horizontalHeader()->setStretchLastSection(true);
+
+    ui->table_history->verticalHeader()->hide();
+    ui->table_history->horizontalHeader()->hide();
 
     //
     _historyModel = new HistoryModel(this);
+    ui->table_history->setModel(_historyModel);
 
-    ui->historyTable->setMinimumWidth(340);
-    ui->historyTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->historyTable->horizontalHeader()->setStretchLastSection(true);
-
-    ui->historyTable->verticalHeader()->hide();
-    ui->historyTable->horizontalHeader()->hide();
-
-    ui->historyTable->setModel(_historyModel);
-
-    // Create sub-horizontal layout for history's clear button
-    auto *horLayoutHistoryClearBtn = new QHBoxLayout;
-
-    horLayoutHistoryClearBtn->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    horLayoutHistoryClearBtn->addWidget(_clearBtn);
-    horLayoutHistoryClearBtn->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-
-    horLayoutHistoryClearBtn->setAlignment(_clearBtn, Qt::AlignCenter);
-
-    // Create vertical layout for history component
-    auto *verLayoutHistory = new QVBoxLayout;
-
-    verLayoutHistory->addWidget(ui->historyLbl);
-    verLayoutHistory->addWidget(ui->historyTable);
-    verLayoutHistory->addLayout(horLayoutHistoryClearBtn);
-
-    // Create digital clock
-    auto *horLayoutDigitalTimer = new QHBoxLayout;
-
-    horLayoutDigitalTimer->addWidget(ui->le_hour);
-    horLayoutDigitalTimer->addWidget(ui->sep1);
-    horLayoutDigitalTimer->addWidget(ui->le_minute);
-    horLayoutDigitalTimer->addWidget(ui->sep2);
-    horLayoutDigitalTimer->addWidget(ui->le_second);
-
+    //
     ui->le_hour->setValidator(new IntRangeValidator(0, 24, this));
     ui->le_minute->setValidator(new IntRangeValidator(0, 60, this));
     ui->le_second->setValidator(new IntRangeValidator(0, 60, this));
 
-    // Create vertical layout for a clock, a timer and control buttons
-    auto *verLayoutClockTimer = new QVBoxLayout;
+    //
+    auto* widgetClockLayout = new QHBoxLayout;
 
-    _clockWidget = new Ui::ClockWidget(this);
+    _clockWidget = new Ui::ClockWidget(ui->widget_clock);
 
-    verLayoutClockTimer->addLayout(horLayoutDigitalTimer);
-    verLayoutClockTimer->addWidget(_clockWidget);
-    verLayoutClockTimer->addWidget(_startBtn);
-    verLayoutClockTimer->addWidget(_stopBtn);
-    verLayoutClockTimer->addWidget(_restartBtn);
+    widgetClockLayout->addWidget(_clockWidget);
 
-    verLayoutClockTimer->setAlignment(_startBtn, Qt::AlignCenter);
-    verLayoutClockTimer->setAlignment(_stopBtn, Qt::AlignCenter);
-    verLayoutClockTimer->setAlignment(_restartBtn, Qt::AlignCenter);
-    verLayoutClockTimer->setContentsMargins(0, 0, 0, 0);
+    ui->widget_clock->setLayout(widgetClockLayout);
 
-    _stopBtn->hide();
+    //
+    ui->layout_main->setStretch(0, 1);
+    ui->layout_main->setStretch(1, 3);
+    ui->layout_main->setStretch(2, 1);
+    ui->layout_main->setStretch(3, 6);
+    ui->layout_main->setStretch(4, 5);
 
-    // Create horizontal layout for history and clock/timer components
-    auto *horLayoutForComp = new QHBoxLayout;
-
-    horLayoutForComp->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    horLayoutForComp->addLayout(verLayoutHistory);
-    horLayoutForComp->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    horLayoutForComp->addLayout(verLayoutClockTimer);
-    horLayoutForComp->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-
-    horLayoutForComp->setStretch(0, 1);
-    horLayoutForComp->setStretch(1, 3);
-    horLayoutForComp->setStretch(2, 1);
-    horLayoutForComp->setStretch(3, 6);
-    horLayoutForComp->setStretch(4, 5);
-
-    horLayoutForComp->setContentsMargins(0, 30, 0, 30);
-
-    // Create main vertical layout for widget
-    auto *verLayoutMain = new QVBoxLayout;
-
-    verLayoutMain->setContentsMargins(0, 0, 0, 0);
-
-    verLayoutMain->addLayout(horLayoutForComp);
-
-    setLayout(verLayoutMain);
-
+    //
     setupStyle();
 }
 
 inline void ClockTimerApp::setupConnections()
 {
-    QObject::connect(_clearBtn, &QPushButton::clicked, this, &ClockTimerApp::clearAll);
-    QObject::connect(_startBtn, &QPushButton::clicked, this, &ClockTimerApp::startTimer);
-    QObject::connect(_stopBtn, &QPushButton::clicked, this, &ClockTimerApp::stopTimer);
-    QObject::connect(_restartBtn, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
+    QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearAll);
+    QObject::connect(ui->btn_start, &QPushButton::clicked, this, &ClockTimerApp::startTimer);
+    QObject::connect(ui->btn_stop, &QPushButton::clicked, this, &ClockTimerApp::stopTimer);
+    QObject::connect(ui->btn_restart, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
     QObject::connect(_clock, &QTimer::timeout, this, &ClockTimerApp::updateEverySecond);
     QObject::connect(_timer, &QTimer::timeout, this, &ClockTimerApp::stopTimer);
 }
@@ -155,23 +101,6 @@ inline void ClockTimerApp::setupStyle()
         QTextStream in(&file);
         setStyleSheet(in.readAll());
     }
-}
-
-QPushButton *ClockTimerApp::buildBtn(const char *text, QWidget *parent)
-{
-    QPushButton *newBtn = new QPushButton(parent);
-
-    newBtn->setFixedSize({251, 51});
-    newBtn->setText(text);
-
-    QFont font = newBtn->font();
-    font.setPointSize(12);
-    newBtn->setFont(font);
-
-    newBtn->setCursor(QCursor(Qt::PointingHandCursor));
-    newBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    return newBtn;
 }
 
 void ClockTimerApp::clearAll()
@@ -310,8 +239,8 @@ void ClockTimerApp::startTimer()
         return;
     }
 
-    _startBtn->hide();
-    _stopBtn->show();
+    ui->btn_start->hide();
+    ui->btn_stop->show();
 
     _selectedMilliseconds = timeToMills(_clockWidget->getSelectedTime());
 
@@ -331,8 +260,8 @@ void ClockTimerApp::stopTimer()
 
     _timer->stop();
 
-    _startBtn->show();
-    _stopBtn->hide();
+    ui->btn_start->show();
+    ui->btn_stop->hide();
 
     _clockWidget->clear();
 
@@ -341,10 +270,15 @@ void ClockTimerApp::stopTimer()
 
 void ClockTimerApp::restartTimer()
 {
+    if (_clockWidget->focused() == false)
+    {
+        return;
+    }
+
     _timer->start(_selectedMilliseconds);
 
-    _startBtn->hide();
-    _stopBtn->show();
+    ui->btn_start->hide();
+    ui->btn_stop->show();
 
     _timerIsExecuting = true;
 }

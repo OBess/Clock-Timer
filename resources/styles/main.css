@@ -1,12 +1,7 @@
 QWidget {
   background: #121212;
   color: white;
-}
-
-#historyTable,
-#timer,
-#historyLbl {
-  background-color: #00000000;
+  border: none;
 }
 
 QLineEdit {
@@ -32,8 +27,9 @@ QPushButton:pressed {
   background-color: white;
 }
 
-QLabel#historyLbl {
+QLabel#lbl_history {
   color: #888;
+  border: 1px solid #888;
 }
 
 QTableView {

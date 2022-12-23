@@ -44,15 +44,9 @@ private:
     static int timeToMills(QTime time) noexcept;
     static QTime millsToTime(int mills) noexcept;
 
-    static QPushButton *buildBtn(const char *text, QWidget *parent);
-
     Ui::ClockTimerApp *ui = nullptr;
 
     Ui::ClockWidget *_clockWidget = nullptr;
-    QPushButton *_startBtn = nullptr;
-    QPushButton *_stopBtn = nullptr;
-    QPushButton *_restartBtn = nullptr;
-    QPushButton *_clearBtn = nullptr;
 
     HistoryModel *_historyModel = nullptr;
 
