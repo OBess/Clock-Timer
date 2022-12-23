@@ -24,7 +24,7 @@ public:
     ~ClockTimerApp();
 
 private slots:
-    void clearAll();
+    void clearHistoryTable();
     void updateEverySecond();
     void startTimer();
     void stopTimer();

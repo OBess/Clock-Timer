@@ -18,15 +18,14 @@ ClockTimerApp::ClockTimerApp(QWidget *parent)
       ui(new Ui::ClockTimerApp),
       _iniFile("settings.ini")
 {
-    _clock = new QTimer(this);
-    _timer = new QTimer(this);
-
     ui->setupUi(this);
     setupUi();
     setupConnections();
 
-    using namespace std::chrono_literals;
-    _clock->setInterval(100ms);
+    _clock = new QTimer(this);
+    _timer = new QTimer(this);
+
+    _clock->setInterval(100);
     _clock->start();
 
     setupApp();
@@ -41,52 +40,40 @@ ClockTimerApp::~ClockTimerApp()
 
 inline void ClockTimerApp::setupUi()
 {
-    //
+    // Hide "Stop" button, we will see this when clicked "Start" button
     ui->btn_stop->hide();
 
-    //
-    ui->table_history->setMinimumWidth(340);
+    // Add some stretching to cells in History table
     ui->table_history->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->table_history->horizontalHeader()->setStretchLastSection(true);
 
-    ui->table_history->verticalHeader()->hide();
-    ui->table_history->horizontalHeader()->hide();
-
-    //
+    // Create and set History model to History table
     _historyModel = new HistoryModel(this);
     ui->table_history->setModel(_historyModel);
 
-    //
+    // Setup validator to line editos that represent digital clock
     ui->le_hour->setValidator(new IntRangeValidator(0, 24, this));
     ui->le_minute->setValidator(new IntRangeValidator(0, 60, this));
     ui->le_second->setValidator(new IntRangeValidator(0, 60, this));
 
-    //
-    auto* widgetClockLayout = new QHBoxLayout;
+    // Set layout to dummy widget
+    QHBoxLayout* widgetClockLayout = new QHBoxLayout(ui->widget_clock);
 
+    // Create ClockWidget instance and add to the previously created layout
     _clockWidget = new Ui::ClockWidget(ui->widget_clock);
-
     widgetClockLayout->addWidget(_clockWidget);
 
-    ui->widget_clock->setLayout(widgetClockLayout);
-
-    //
-    ui->layout_main->setStretch(0, 1);
-    ui->layout_main->setStretch(1, 3);
-    ui->layout_main->setStretch(2, 1);
-    ui->layout_main->setStretch(3, 6);
-    ui->layout_main->setStretch(4, 5);
-
-    //
+    // Load CSS2 stylesheet from internal file and setup style to the current object
     setupStyle();
 }
 
 inline void ClockTimerApp::setupConnections()
 {
-    QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearAll);
     QObject::connect(ui->btn_start, &QPushButton::clicked, this, &ClockTimerApp::startTimer);
     QObject::connect(ui->btn_stop, &QPushButton::clicked, this, &ClockTimerApp::stopTimer);
     QObject::connect(ui->btn_restart, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
+    QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearHistoryTable);
+
     QObject::connect(_clock, &QTimer::timeout, this, &ClockTimerApp::updateEverySecond);
     QObject::connect(_timer, &QTimer::timeout, this, &ClockTimerApp::stopTimer);
 }
@@ -103,7 +90,7 @@ inline void ClockTimerApp::setupStyle()
     }
 }
 
-void ClockTimerApp::clearAll()
+void ClockTimerApp::clearHistoryTable()
 {
     _historyModel->removeRows(0, _historyModel->rowCount());
 }
