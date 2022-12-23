@@ -257,7 +257,7 @@ void ClockTimerApp::stopTimer()
 
 void ClockTimerApp::restartTimer()
 {
-    if (_clockWidget->focused() == false)
+    if (_clockWidget->focused() == false || ui->btn_start->isVisible())
     {
         return;
     }
