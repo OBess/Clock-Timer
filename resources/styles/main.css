@@ -1,0 +1,53 @@
+QWidget {
+  background: #121212;
+  color: white;
+}
+
+#historyTable,
+#timer,
+#historyLbl {
+  background-color: #00000000;
+}
+
+QLineEdit {
+  border: 1px solid white;
+  border-radius: 2px;
+}
+
+QPushButton {
+  background-color: #121212;
+
+  border: 1px solid #121212;
+  border-radius: 2px;
+
+  font-weight: bold;
+}
+
+QPushButton:hover {
+  background-color: #d2d0d0;
+  color: #121212;
+}
+
+QPushButton:pressed {
+  background-color: white;
+}
+
+QLabel#historyLbl {
+  color: #888;
+}
+
+QTableView {
+  border: 1px solid #888;
+  border-radius: 2px;
+}
+
+QTableView::item:focus {
+  border: none;
+}
+
+QTableView::item:selected {
+  border: none;
+  color: #121212;
+  background-color: white;
+}
+

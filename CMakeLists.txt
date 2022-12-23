@@ -16,7 +16,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS design)
 
-file (GLOB_RECURSE found_src include/*.h src/*.cpp design/*.ui)
+file (GLOB_RECURSE found_src include/*.h src/*.cpp design/*.ui resources/*.qrc)
 
 set(PROJECT_SOURCES
         main.cpp
