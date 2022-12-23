@@ -1,6 +1,7 @@
 #ifndef TIMEDRAWWIDGET_H
 #define TIMEDRAWWIDGET_H
 
+#include <QDebug> // DELETE
 #include <cmath>
 
 #include <QPainter>
@@ -10,35 +11,8 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
-class QLabel;
-
 namespace Ui
 {
-    namespace math
-    {
-
-        static inline QPointF rotate(QPointF point, float angle, QPointF _center = QPointF(0, 0))
-        {
-            float s = std::sin(angle);
-            float c = std::cos(angle);
-
-            // translate point back to origin:
-            point.setX(point.x() - _center.x());
-            point.setY(point.y() - _center.y());
-
-            // rotate point
-            float xnew = point.x() * c - point.y() * s;
-            float ynew = point.x() * s + point.y() * c;
-
-            // translate point back:
-            point.setX(xnew + _center.x());
-            point.setY(ynew + _center.y());
-
-            return point;
-        }
-
-    } // namespace math
-
     class ClockWidget : public QWidget
     {
         Q_OBJECT
@@ -54,18 +28,54 @@ namespace Ui
 
         ~ClockWidget() override = default;
 
-        inline void updateEverySecond() noexcept
+        inline void updateEverySecond()
         {
             this->repaint();
         }
 
+        constexpr void clear() noexcept
+        {
+            _mouseAngel = 0.0;
+        }
+
+        inline QTime getSelectedTime() const noexcept
+        {
+            const float selectedDivisions = -_mouseAngel / angleOfDivision();
+
+            return QTime(0, static_cast<int>(selectedDivisions),
+                         static_cast<int>(selectedDivisions * 60.f) % 60);
+        }
+
+        constexpr bool focused() const noexcept
+        {
+            return _focused;
+        }
+
     private:
+        void mousePressEvent(QMouseEvent *event) override
+        {
+            setFocus();
+            _focused = true;
+        }
+
         void mouseMoveEvent(QMouseEvent *event) override
         {
             const QPointF mainVec(QPointF(_center.x(), _center.y() - _radius) - _center);
             const QPointF mouseVec(event->localPos() - _center);
 
             _mouseAngel = -vecProd(mainVec, mouseVec);
+
+            getSelectedTime();
+        }
+
+        void keyPressEvent(QKeyEvent *event) override
+        {
+            if (event->key() == Qt::Key_Escape)
+            {
+                _mouseAngel = 0.0f;
+                clearFocus();
+                _focused = false;
+            }
         }
 
         void paintEvent([[maybe_unused]] QPaintEvent *event) override
@@ -81,14 +91,13 @@ namespace Ui
 
             QPen pen(Qt::black, 1);
 
+            const float angle = angleOfDivision();
+
             // Draw divisions
             pen.setWidth(penWidth / 4);
             pen.setColor(QColor(136, 136, 136));
 
             painter.setPen(pen);
-
-            constexpr int divisionsNumber = 60;
-            constexpr float angle = qDegreesToRadians(360.0f / static_cast<float>(divisionsNumber));
 
             QPointF startDivision1(_center.x(), _center.y() - _radius + _center.y() * 0.12);
             QPointF startDivision2(_center.x(), _center.y() - _radius + _center.y() * 0.07);
@@ -96,9 +105,9 @@ namespace Ui
 
             QPointF textPosition(_center.x(), _center.y() - _radius + _center.y() * 0.20);
 
-            for (int i = 0; i < divisionsNumber; ++i)
+            for (int i = 0; i < _divisionsNumber; ++i)
             {
-                if (i % (divisionsNumber / 12) == 0)
+                if (i % (_divisionsNumber / 12) == 0)
                 {
                     const int number = i == 0 ? 60 : i;
 
@@ -118,10 +127,10 @@ namespace Ui
                     painter.drawLine(startDivision2, endDivision);
                 }
 
-                endDivision = math::rotate(endDivision, angle, _center);
-                startDivision1 = math::rotate(startDivision1, angle, _center);
-                startDivision2 = math::rotate(startDivision2, angle, _center);
-                textPosition = math::rotate(textPosition, angle, _center);
+                endDivision = rotate(endDivision, angle, _center);
+                startDivision1 = rotate(startDivision1, angle, _center);
+                startDivision2 = rotate(startDivision2, angle, _center);
+                textPosition = rotate(textPosition, angle, _center);
             }
 
             // Draw circle
@@ -138,21 +147,21 @@ namespace Ui
             pen.setColor(Qt::white);
             painter.setPen(pen);
 
-            painter.drawLine(_center, math::rotate({_center.x(), _center.y() - _radius + _center.y() * 0.15},
+            painter.drawLine(_center, rotate({_center.x(), _center.y() - _radius + _center.y() * 0.15},
                                                   angle * currentTime.second(), _center));
 
             // Draw minutes
             pen.setWidth(penWidth / 3);
             painter.setPen(pen);
 
-            painter.drawLine(_center, math::rotate({_center.x(), _center.y() - _radius + _center.y() * 0.25},
+            painter.drawLine(_center, rotate({_center.x(), _center.y() - _radius + _center.y() * 0.25},
                                                   angle * currentTime.minute(), _center));
 
             // Draw hours
             pen.setWidth(penWidth / 2);
             painter.setPen(pen);
 
-            painter.drawLine(_center, math::rotate({_center.x(), _center.y() - _radius + _center.y() * 0.55},
+            painter.drawLine(_center, rotate({_center.x(), _center.y() - _radius + _center.y() * 0.55},
                                                   angle * (currentTime.hour() % 12) * 5, _center));
 
             // Draw arc
@@ -191,6 +200,31 @@ namespace Ui
         }
 
     private:
+        inline float angleOfDivision() const noexcept
+        {
+            return qDegreesToRadians(_angleOfArc / static_cast<float>(_divisionsNumber));
+        }
+
+        static inline QPointF rotate(QPointF point, float angle, QPointF _center = QPointF(0, 0))
+        {
+            float s = std::sin(angle);
+            float c = std::cos(angle);
+
+            // translate point back to origin:
+            point.setX(point.x() - _center.x());
+            point.setY(point.y() - _center.y());
+
+            // rotate point
+            float xnew = point.x() * c - point.y() * s;
+            float ynew = point.x() * s + point.y() * c;
+
+            // translate point back:
+            point.setX(xnew + _center.x());
+            point.setY(ynew + _center.y());
+
+            return point;
+        }
+
         static constexpr float map(float x, float in_min, float in_max, float out_min, float out_max) noexcept
         {
           return out_min + ((out_max - out_min) / (in_max - in_min)) * (x - in_min);
@@ -213,6 +247,11 @@ namespace Ui
         QPointF _center;
         float _radius = 0;
         float _mouseAngel = 0;
+
+        bool _focused = false;
+
+        const int _divisionsNumber = 60;
+        const float _angleOfArc = 360.f;
     };
 
 } // namespace Ui

@@ -1,6 +1,7 @@
 #include "clocktimerapp.h"
 #include "./ui_clocktimerapp.h"
 
+#include <QDebug>   // DELETE
 #include <QDate>
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -176,9 +177,21 @@ void ClockTimerApp::updateEverySecond()
 {
     _clockWidget->updateEverySecond();
 
-    const QTime currentTime = QTime::currentTime();
+    if (_clockWidget->focused())
+    {
+        const QTime selectedTime = _clockWidget->getSelectedTime();
 
-    ui->le_hour->setText(QString::number(currentTime.hour()));
-    ui->le_minute->setText(QString::number(currentTime.minute()));
-    ui->le_second->setText(QString::number(currentTime.second()));
+        ui->le_hour->setText(QString::number(selectedTime.hour()));
+        ui->le_minute->setText(QString::number(selectedTime.minute()));
+        ui->le_second->setText(QString::number(selectedTime.second()));
+    }
+    else
+    {
+        const QTime currentTime = QTime::currentTime();
+
+        ui->le_hour->setText(QString::number(currentTime.hour()));
+        ui->le_minute->setText(QString::number(currentTime.minute()));
+        ui->le_second->setText(QString::number(currentTime.second()));
+    }
 }
+
