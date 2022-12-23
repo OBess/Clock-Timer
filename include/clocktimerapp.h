@@ -25,13 +25,24 @@ public:
 
 private slots:
     void clearAll();
-    void insertInterval();
     void updateEverySecond();
+    void startTimer();
+    void stopTimer();
+    void restartTimer();
 
 private:
     void setupUi();
     void setupConnections();
     void setupStyle();
+    void insertInterval(QTime time);
+
+    void updateDigitTime(QTime time);
+
+    void setupApp();
+    void saveApp();
+
+    static int timeToMills(QTime time) noexcept;
+    static QTime millsToTime(int mills) noexcept;
 
     static QPushButton *buildBtn(const char *text, QWidget *parent);
 
@@ -39,11 +50,18 @@ private:
 
     Ui::ClockWidget *_clockWidget = nullptr;
     QPushButton *_startBtn = nullptr;
+    QPushButton *_stopBtn = nullptr;
     QPushButton *_restartBtn = nullptr;
     QPushButton *_clearBtn = nullptr;
 
     HistoryModel *_historyModel = nullptr;
 
     QTimer* _clock = nullptr;
+    QTimer* _timer = nullptr;
+
+    int _selectedMilliseconds = 0;
+    bool _timerIsExecuting = false;
+
+    const QString _iniFile;
 };
 #endif // CLOCKTIMERAPP_H

@@ -33,9 +33,21 @@ namespace Ui
             this->repaint();
         }
 
-        constexpr void clear() noexcept
+        inline void clear() noexcept
         {
             _mouseAngel = 0.0;
+
+            _focused = false;
+            clearFocus();
+        }
+
+        inline void setSelectedTime(QTime selectedTime) noexcept
+        {
+            const float angle = -angleOfDivision();
+
+            _mouseAngel = angle * selectedTime.hour() * 60
+                    + angle * selectedTime.minute()
+                    + angle * selectedTime.second() / 60;
         }
 
         inline QTime getSelectedTime() const noexcept
@@ -72,9 +84,7 @@ namespace Ui
         {
             if (event->key() == Qt::Key_Escape)
             {
-                _mouseAngel = 0.0f;
-                clearFocus();
-                _focused = false;
+                clear();
             }
         }
 
@@ -230,7 +240,7 @@ namespace Ui
           return out_min + ((out_max - out_min) / (in_max - in_min)) * (x - in_min);
         }
 
-        static inline float vecProd(const QPointF& lhs, const QPointF& rhs) noexcept
+        static inline float vecProd(QPointF lhs, QPointF rhs) noexcept
         {
             float angle = std::atan2(lhs.x() + rhs.y() - lhs.y() * rhs.x(),
                                            lhs.x() + rhs.x() + lhs.y() * rhs.y());
