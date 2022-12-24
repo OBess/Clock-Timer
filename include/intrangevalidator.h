@@ -23,14 +23,7 @@ public:
             return State::Acceptable;
         }
 
-        bool isOk = false;
-
-        if (input.toInt(&isOk) > top())
-        {
-            return State::Invalid;
-        }
-
-        if (isOk == false)
+        if (bool isOk = false; input.toInt(&isOk) > top() || isOk == false)
         {
             return State::Invalid;
         }

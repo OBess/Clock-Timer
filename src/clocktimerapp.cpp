@@ -1,30 +1,25 @@
 #include "clocktimerapp.h"
 #include "./ui_clocktimerapp.h"
 
-#include <QDebug>   // DELETE
-#include <QDate>
-#include <QHBoxLayout>
-#include <QPushButton>
 #include <QSettings>
 #include <QTextStream>
-#include <QVBoxLayout>
 
+#include "clockwidget.h"
 #include "historymodel.h"
+#include "settings.h"
 #include "intrangevalidator.h"
-#include "timedrawwidget.h"
+#include "utilities.h"
 
 ClockTimerApp::ClockTimerApp(QWidget *parent)
-    : QWidget(parent),
-      ui(new Ui::ClockTimerApp),
-      _iniFile("settings.ini")
+    : QWidget(parent), ui(new Ui::ClockTimerApp)
 {
     ui->setupUi(this);
 
-    _clock = new QTimer(this);
+    _clockHandler = new QTimer(this);
     _timer = new QTimer(this);
 
-    _clock->setInterval(100);
-    _clock->start();
+    _clockHandler->setInterval(50);
+    _clockHandler->start();
 
     setupUi();
     setupConnections();
@@ -57,7 +52,7 @@ inline void ClockTimerApp::setupUi()
     ui->le_second->setValidator(new IntRangeValidator(0, 60, this));
 
     // Set layout to dummy widget
-    QHBoxLayout* widgetClockLayout = new QHBoxLayout(ui->widget_clock);
+    QHBoxLayout *widgetClockLayout = new QHBoxLayout(ui->widget_clock);
 
     // Create ClockWidget instance and add to the previously created layout
     _clockWidget = new Ui::ClockWidget(ui->widget_clock);
@@ -74,13 +69,13 @@ inline void ClockTimerApp::setupConnections()
     QObject::connect(ui->btn_restart, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
     QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearHistoryTable);
 
-    QObject::connect(_clock, &QTimer::timeout, this, &ClockTimerApp::updateEverySecond);
+    QObject::connect(_clockHandler, &QTimer::timeout, this, &ClockTimerApp::updateClocks);
     QObject::connect(_timer, &QTimer::timeout, this, &ClockTimerApp::stopTimer);
 }
 
 inline void ClockTimerApp::setupStyle()
 {
-    if (QFile file("://styles/main.css"); file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (QFile file(Settings::Style::MAIN_STYLE); file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         if (file.size() == 0)
             return;
@@ -95,14 +90,15 @@ void ClockTimerApp::clearHistoryTable()
     _historyModel->removeRows(0, _historyModel->rowCount());
 }
 
-void ClockTimerApp::insertInterval(QTime time)
+void ClockTimerApp::insertIntervalToTable(QTime time)
 {
-    _historyModel->insertRow(_historyModel->rowCount());
+    if(_historyModel->insertRow(_historyModel->rowCount()))
+    {
+        const int row = _historyModel->rowCount() - 1;
 
-    _historyModel->setData(_historyModel->index(_historyModel->rowCount() - 1, 0),
-                           QDateTime::currentDateTime().toString());
-    _historyModel->setData(_historyModel->index(_historyModel->rowCount() - 1, 1),
-                           time.toString());
+        _historyModel->setData(_historyModel->index(row, 0), QDateTime::currentDateTime().toString());
+        _historyModel->setData(_historyModel->index(row, 1), time.toString());
+    }
 }
 
 void ClockTimerApp::updateDigitTime(QTime time)
@@ -114,37 +110,42 @@ void ClockTimerApp::updateDigitTime(QTime time)
 
 void ClockTimerApp::setupApp()
 {
-    QSettings settings(_iniFile, QSettings::IniFormat);
+    QSettings settings(Settings::INI::FILE_PATH, QSettings::IniFormat);
 
-    //
-    settings.beginGroup("MainWindow");
+    settings.beginGroup(Settings::INI::MAIN_WINDOW);
 
-    if (settings.value("IsMaximized", false).toBool())
+    if (settings.value(Settings::INI::IS_MAXIMIZED, false).toBool())
     {
         showMaximized();
     }
     else
     {
-        resize(settings.value("Width", 640).toInt(), settings.value("Height", 480).toInt());
+        resize(settings.value(Settings::INI::WIDTH, 640).toInt(),
+               settings.value(Settings::INI::HEIGHT, 480).toInt());
     }
 
     settings.endGroup();
 
-    //
-    settings.beginGroup("History");
+    // Read items to add them to table history
+    settings.beginGroup(Settings::INI::HISTORY);
 
-    const int size = settings.beginReadArray("Item");
+    const int size = settings.beginReadArray(Settings::INI::ITEM);
+
     for (int i = 0; i < size; ++i)
     {
-        _historyModel->insertRow(_historyModel->rowCount());
-
         settings.setArrayIndex(i);
 
-        _historyModel->setData(_historyModel->index(_historyModel->rowCount() - 1, 0),
-                               settings.value("datetime", "Invalid").toString());
-        _historyModel->setData(_historyModel->index(_historyModel->rowCount() - 1, 1),
-                               settings.value("interval", "Invalid").toString());
+        _historyModel->insertRow(_historyModel->rowCount());
+
+        const int row = _historyModel->rowCount() - 1;
+
+        _historyModel->setData(_historyModel->index(row, 0),
+                               settings.value(Settings::INI::DATETIME, Settings::INI::INVALID).toString());
+
+        _historyModel->setData(_historyModel->index(row, 1),
+                               settings.value(Settings::INI::INTERVAL, Settings::INI::INVALID).toString());
     }
+
     settings.endArray();
 
     settings.endGroup();
@@ -152,34 +153,37 @@ void ClockTimerApp::setupApp()
 
 void ClockTimerApp::saveApp()
 {
-    QSettings settings(_iniFile, QSettings::IniFormat);
+    QSettings settings(Settings::INI::FILE_PATH, QSettings::IniFormat);
 
-    //
-    settings.beginGroup("MainWindow");
+    settings.beginGroup(Settings::INI::MAIN_WINDOW);
 
-    settings.setValue("IsMaximized", isMaximized());
-    settings.setValue("Width", width());
-    settings.setValue("Height", height());
+    settings.setValue(Settings::INI::IS_MAXIMIZED, isMaximized());
+    settings.setValue(Settings::INI::WIDTH, width());
+    settings.setValue(Settings::INI::HEIGHT, height());
 
     settings.endGroup();
 
-    //
+    // Save history only if there is at least one item,
+    // otherwise just remove group if there it is
     if (_historyModel->rowCount() == 0)
     {
-        settings.remove("History");
+        settings.remove(Settings::INI::HISTORY);
     }
     else
     {
-        settings.beginGroup("History");
+        settings.beginGroup(Settings::INI::HISTORY);
 
-        settings.beginWriteArray("Item");
+        settings.beginWriteArray(Settings::INI::ITEM);
 
         for (int i = 0; i < _historyModel->rowCount(); ++i)
         {
             settings.setArrayIndex(i);
 
-            settings.setValue("datetime", _historyModel->data(_historyModel->index(i, 0)).toString());
-            settings.setValue("interval", _historyModel->data(_historyModel->index(i, 1)).toString());
+            settings.setValue(Settings::INI::DATETIME,
+                              _historyModel->data(_historyModel->index(i, 0)).toString());
+
+            settings.setValue(Settings::INI::INTERVAL,
+                              _historyModel->data(_historyModel->index(i, 1)).toString());
         }
 
         settings.endArray();
@@ -188,24 +192,13 @@ void ClockTimerApp::saveApp()
     }
 }
 
-int ClockTimerApp::timeToMills(QTime time) noexcept
-{
-    return (time.hour() * 3600 + time.minute() * 60 + time.second()) * 1000;
-}
-
-QTime ClockTimerApp::millsToTime(int mills) noexcept
-{
-    mills = mills / 1000;
-    return QTime(mills / 3600, mills / 60, mills % 60);
-}
-
-void ClockTimerApp::updateEverySecond()
+void ClockTimerApp::updateClocks()
 {
     _clockWidget->updateEverySecond();
 
     if (_timerIsExecuting)
     {
-        _clockWidget->setSelectedTime(millsToTime(_timer->remainingTime()));
+        _clockWidget->setSelectedTime(Utils::MillsToTime(_timer->remainingTime()));
 
         updateDigitTime(_clockWidget->getSelectedTime());
     }
@@ -229,7 +222,7 @@ void ClockTimerApp::startTimer()
     ui->btn_start->hide();
     ui->btn_stop->show();
 
-    _selectedMilliseconds = timeToMills(_clockWidget->getSelectedTime());
+    _selectedMilliseconds = Utils::TimeToMills(_clockWidget->getSelectedTime());
 
     _timer->start(_selectedMilliseconds);
 
@@ -243,7 +236,7 @@ void ClockTimerApp::stopTimer()
         return;
     }
 
-    insertInterval(millsToTime(_timer->remainingTime()));
+    insertIntervalToTable(Utils::MillsToTime(_selectedMilliseconds - _timer->remainingTime()));
 
     _timer->stop();
 
@@ -257,7 +250,7 @@ void ClockTimerApp::stopTimer()
 
 void ClockTimerApp::restartTimer()
 {
-    if (_clockWidget->focused() == false || ui->btn_start->isVisible())
+    if (_timerIsExecuting)
     {
         return;
     }
@@ -269,4 +262,3 @@ void ClockTimerApp::restartTimer()
 
     _timerIsExecuting = true;
 }
-

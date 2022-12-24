@@ -12,7 +12,6 @@ namespace Ui
 }
 
 class HistoryModel;
-class QPushButton;
 QT_END_NAMESPACE
 
 class ClockTimerApp : public QWidget
@@ -25,7 +24,7 @@ public:
 
 private slots:
     void clearHistoryTable();
-    void updateEverySecond();
+    void updateClocks();
     void startTimer();
     void stopTimer();
     void restartTimer();
@@ -34,15 +33,13 @@ private:
     void setupUi();
     void setupConnections();
     void setupStyle();
-    void insertInterval(QTime time);
+
+    void insertIntervalToTable(QTime time);
 
     void updateDigitTime(QTime time);
 
     void setupApp();
     void saveApp();
-
-    static int timeToMills(QTime time) noexcept;
-    static QTime millsToTime(int mills) noexcept;
 
     Ui::ClockTimerApp *ui = nullptr;
 
@@ -50,12 +47,11 @@ private:
 
     HistoryModel *_historyModel = nullptr;
 
-    QTimer* _clock = nullptr;
-    QTimer* _timer = nullptr;
+    QTimer *_clockHandler = nullptr;
+    QTimer *_timer = nullptr;
 
     int _selectedMilliseconds = 0;
-    bool _timerIsExecuting = false;
 
-    const QString _iniFile;
+    bool _timerIsExecuting = false;
 };
 #endif // CLOCKTIMERAPP_H
