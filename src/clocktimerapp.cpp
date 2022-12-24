@@ -243,7 +243,7 @@ void ClockTimerApp::stopTimer()
     ui->btn_start->show();
     ui->btn_stop->hide();
 
-    _clockWidget->clear();
+    _clockWidget->clearSelected();
 
     _timerIsExecuting = false;
 }

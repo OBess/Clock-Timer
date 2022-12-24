@@ -1,13 +1,12 @@
 #ifndef CLOCKWIDGET_H
 #define CLOCKWIDGET_H
 
-#include <cmath>
-
 #include <QPainter>
 #include <QPaintEvent>
-#include <QtMath>
 #include <QTime>
 #include <QWidget>
+
+#include "utilities.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -25,14 +24,14 @@ namespace Ui
             setMinimumHeight(300);
         }
 
-        ~ClockWidget() override = default;
+        virtual ~ClockWidget() override = default;
 
         inline void updateEverySecond()
         {
             this->repaint();
         }
 
-        inline void clear() noexcept
+        inline void clearSelected() noexcept
         {
             _mouseAngel = 0.0;
 
@@ -44,10 +43,12 @@ namespace Ui
         {
             const float angle = -angleOfDivision();
 
-            _mouseAngel = angle * selectedTime.hour() * 60 + angle * selectedTime.minute() + angle * selectedTime.second() / 60;
+            _mouseAngel = (angle * selectedTime.hour() * 60) 
+                        + (angle * selectedTime.minute()) 
+                        + (angle * selectedTime.second() / 60);
         }
 
-        inline QTime getSelectedTime() const noexcept
+        [[nodiscard]] inline QTime getSelectedTime() const noexcept
         {
             const float selectedDivisions = -_mouseAngel / angleOfDivision();
 
@@ -55,13 +56,13 @@ namespace Ui
                          static_cast<int>(selectedDivisions * 60.f) % 60);
         }
 
-        constexpr bool focused() const noexcept
+        [[nodiscard]] constexpr bool focused() const noexcept
         {
             return _focused;
         }
 
     private:
-        void mousePressEvent(QMouseEvent *event) override
+        void mousePressEvent([[maybe_unused]] QMouseEvent *event) override
         {
             setFocus();
             _focused = true;
@@ -72,16 +73,14 @@ namespace Ui
             const QPointF mainVec(QPointF(_center.x(), _center.y() - _radius) - _center);
             const QPointF mouseVec(event->localPos() - _center);
 
-            _mouseAngel = -vecProd(mainVec, mouseVec);
-
-            getSelectedTime();
+            _mouseAngel = -Utils::VecProd(mainVec, mouseVec);
         }
 
         void keyPressEvent(QKeyEvent *event) override
         {
             if (event->key() == Qt::Key_Escape)
             {
-                clear();
+                clearSelected();
             }
         }
 
@@ -134,10 +133,10 @@ namespace Ui
                     painter.drawLine(startDivision2, endDivision);
                 }
 
-                endDivision = rotate(endDivision, angle, _center);
-                startDivision1 = rotate(startDivision1, angle, _center);
-                startDivision2 = rotate(startDivision2, angle, _center);
-                textPosition = rotate(textPosition, angle, _center);
+                endDivision = Utils::Rotate(endDivision, angle, _center);
+                startDivision1 = Utils::Rotate(startDivision1, angle, _center);
+                startDivision2 = Utils::Rotate(startDivision2, angle, _center);
+                textPosition = Utils::Rotate(textPosition, angle, _center);
             }
 
             // Draw circle
@@ -154,26 +153,26 @@ namespace Ui
             pen.setColor(Qt::white);
             painter.setPen(pen);
 
-            painter.drawLine(_center, rotate({_center.x(), _center.y() - _radius + _center.y() * 0.15},
-                                             angle * currentTime.second(), _center));
+            painter.drawLine(_center, Utils::Rotate({_center.x(), _center.y() - _radius + _center.y() * 0.15},
+                                                    angle * currentTime.second(), _center));
 
             // Draw minutes
             pen.setWidth(penWidth / 3);
             painter.setPen(pen);
 
-            painter.drawLine(_center, rotate({_center.x(), _center.y() - _radius + _center.y() * 0.25},
-                                             angle * currentTime.minute(), _center));
+            painter.drawLine(_center, Utils::Rotate({_center.x(), _center.y() - _radius + _center.y() * 0.25},
+                                                    angle * currentTime.minute(), _center));
 
             // Draw hours
             pen.setWidth(penWidth / 2);
             painter.setPen(pen);
 
-            painter.drawLine(_center, rotate({_center.x(), _center.y() - _radius + _center.y() * 0.55},
-                                             angle * (currentTime.hour() % 12) * 5, _center));
+            painter.drawLine(_center, Utils::Rotate({_center.x(), _center.y() - _radius + _center.y() * 0.55},
+                                                    angle * (currentTime.hour() % 12) * 5, _center));
 
             // Draw arc
             const QRectF rect(_center.x() - _radius, _center.y() - _radius, _radius + _radius, _radius + _radius);
-            const float mapped = map(_mouseAngel, 0, 6.28318531f, 0, 5760.f);
+            const float mapped = Utils::Map(_mouseAngel, 0, 6.28318531f, 0, 5760.f);
 
             pen.setWidth(penWidth);
             pen.setColor(Qt::white);
@@ -210,44 +209,6 @@ namespace Ui
         inline float angleOfDivision() const noexcept
         {
             return qDegreesToRadians(_angleOfArc / static_cast<float>(_divisionsNumber));
-        }
-
-        static inline QPointF rotate(QPointF point, float angle, QPointF _center = QPointF(0, 0))
-        {
-            float s = std::sin(angle);
-            float c = std::cos(angle);
-
-            // translate point back to origin:
-            point.setX(point.x() - _center.x());
-            point.setY(point.y() - _center.y());
-
-            // rotate point
-            float xnew = point.x() * c - point.y() * s;
-            float ynew = point.x() * s + point.y() * c;
-
-            // translate point back:
-            point.setX(xnew + _center.x());
-            point.setY(ynew + _center.y());
-
-            return point;
-        }
-
-        static constexpr float map(float x, float in_min, float in_max, float out_min, float out_max) noexcept
-        {
-            return out_min + ((out_max - out_min) / (in_max - in_min)) * (x - in_min);
-        }
-
-        static inline float vecProd(QPointF lhs, QPointF rhs) noexcept
-        {
-            float angle = std::atan2(lhs.x() + rhs.y() - lhs.y() * rhs.x(),
-                                     lhs.x() + rhs.x() + lhs.y() * rhs.y());
-
-            angle = angle * qDegreesToRadians(360.f) / (2 * M_PI);
-
-            if (angle < 0.0f)
-                return angle + qDegreesToRadians(360.f);
-            else
-                return angle;
         }
 
     private:
