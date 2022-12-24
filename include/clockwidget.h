@@ -3,7 +3,6 @@
 
 #include <QPainter>
 #include <QPaintEvent>
-#include <QTime>
 #include <QWidget>
 
 #include "utilities.h"
