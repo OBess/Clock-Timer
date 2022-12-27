@@ -1,5 +1,5 @@
-#ifndef CLOCKWIDGET_H
-#define CLOCKWIDGET_H
+#ifndef ANALOGCLOCK_H
+#define ANALOGCLOCK_H
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -10,12 +10,12 @@
 QT_BEGIN_NAMESPACE
 namespace Ui
 {
-    class ClockWidget : public QWidget
+    class AnalogClock : public QWidget
     {
         Q_OBJECT
 
     public:
-        ClockWidget(QWidget *parent = nullptr)
+        AnalogClock(QWidget *parent = nullptr)
             : QWidget(parent)
         {
             setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -23,12 +23,7 @@ namespace Ui
             setMinimumHeight(300);
         }
 
-        virtual ~ClockWidget() override = default;
-
-        inline void updateEverySecond()
-        {
-            this->repaint();
-        }
+        ~AnalogClock() override = default;
 
         inline void clearSelected() noexcept
         {
@@ -69,7 +64,7 @@ namespace Ui
 
         void mouseMoveEvent(QMouseEvent *event) override
         {
-            const QPointF mainVec(QPointF(_center.x(), _center.y() - _radius) - _center);
+            const QPointF mainVec(0, -_radius);
             const QPointF mouseVec(event->localPos() - _center);
 
             _mouseAngel = -Utils::VecProd(mainVec, mouseVec);
@@ -91,10 +86,10 @@ namespace Ui
             _radius = _center.x() * 0.8;
 
             QPainter painter(this);
-            painter.setRenderHint(QPainter::Antialiasing, true);
-            painter.setFont(QFont("Consolas", width() / 30));
-
             QPen pen(Qt::black, 1);
+
+            painter.beginNativePainting();
+            painter.setRenderHint(QPainter::Antialiasing, true);
 
             const float angle = angleOfDivision();
 
@@ -103,47 +98,35 @@ namespace Ui
             pen.setColor(QColor(136, 136, 136));
 
             painter.setPen(pen);
+            painter.translate(_center);
 
-            QPointF startDivision1(_center.x(), _center.y() - _radius + _center.y() * 0.12);
-            QPointF startDivision2(_center.x(), _center.y() - _radius + _center.y() * 0.07);
-            QPointF endDivision(_center.x(), _center.y() - _radius);
+            painter.save();
 
-            QPointF textPosition(_center.x(), _center.y() - _radius + _center.y() * 0.20);
+            QPointF startHourDivision(0, -_radius * 0.85);
+            QPointF startMinuteDivision(0, -_radius * 0.95);
+            QPointF endDivision(0, -_radius);
 
-            for (int i = 0; i < _divisionsNumber; ++i)
+            for (unsigned i = 0; i < _divisionsNumber; ++i)
             {
                 if (i % (_divisionsNumber / 12) == 0)
                 {
-                    const int number = i == 0 ? 60 : i;
+                    pen.setWidth(penWidth / 2);
+                    pen.setColor(QColor(180, 180, 180));
+                    painter.setPen(pen);
 
-                    painter.drawText(textPosition,
-                                     QString::number(static_cast<int>(number / 5)));
-
-                    pen.setWidth(penWidth / 3);
-                    pen.setColor(QColor(136, 136, 136));
-
-                    painter.drawLine(startDivision1, endDivision);
+                    painter.drawLine(startHourDivision, endDivision);
                 }
                 else
                 {
                     pen.setWidth(penWidth / 4);
                     pen.setColor(QColor(136, 136, 136));
+                    painter.setPen(pen);
 
-                    painter.drawLine(startDivision2, endDivision);
+                    painter.drawLine(startMinuteDivision, endDivision);
                 }
 
-                endDivision = Utils::Rotate(endDivision, angle, _center);
-                startDivision1 = Utils::Rotate(startDivision1, angle, _center);
-                startDivision2 = Utils::Rotate(startDivision2, angle, _center);
-                textPosition = Utils::Rotate(textPosition, angle, _center);
+                painter.rotate(angle);
             }
-
-            // Draw circle
-            pen.setWidth(penWidth);
-            painter.setPen(pen);
-
-            painter.drawEllipse(_center.x() - _radius, _center.y() - _radius,
-                                _radius * 2, _radius * 2);
 
             const QTime currentTime = QTime::currentTime();
 
@@ -152,62 +135,67 @@ namespace Ui
             pen.setColor(Qt::white);
             painter.setPen(pen);
 
-            painter.drawLine(_center, Utils::Rotate({_center.x(), _center.y() - _radius + _center.y() * 0.15},
-                                                    angle * currentTime.second(), _center));
+            painter.rotate(angle * currentTime.second());
+            painter.drawLine(QPointF{0, 0}, {0, -_radius * 0.8});
 
             // Draw minutes
+            painter.rotate(-angle * currentTime.second());
+            painter.rotate(angle * currentTime.minute());
+
             pen.setWidth(penWidth / 3);
             painter.setPen(pen);
 
-            painter.drawLine(_center, Utils::Rotate({_center.x(), _center.y() - _radius + _center.y() * 0.25},
-                                                    angle * currentTime.minute(), _center));
+            painter.drawLine(QPointF{0, 0}, {0, -_radius * 0.6});
 
             // Draw hours
             pen.setWidth(penWidth / 2);
             painter.setPen(pen);
 
-            painter.drawLine(_center, Utils::Rotate({_center.x(), _center.y() - _radius + _center.y() * 0.55},
-                                                    angle * (currentTime.hour() % 12) * 5, _center));
+            painter.rotate(-angle * currentTime.minute());
+            painter.rotate(angle * (currentTime.hour() % 12) * 5);
+
+            painter.drawLine(QPointF{0, 0}, {0, -_radius * 0.4});
 
             // Draw arc
-            const QRectF rect(_center.x() - _radius, _center.y() - _radius, _radius + _radius, _radius + _radius);
-            const float mapped = Utils::Map(_mouseAngel, 0, 6.28318531f, 0, 5760.f);
+            painter.restore();
+
+            const float entireArc = 5760.f;
+            const float startArc = entireArc / 4;
+
+            const QRectF rect(-_radius, -_radius, _radius + _radius, _radius + _radius);
+            const float mappedAngel = Utils::Map(_mouseAngel, 0, 360.f, 0, entireArc);
 
             pen.setWidth(penWidth);
             pen.setColor(Qt::white);
             pen.setCapStyle(Qt::FlatCap);
 
             painter.setPen(pen);
-
-            painter.drawArc(rect, 1440, mapped);
+            painter.drawArc(rect, startArc, mappedAngel);
 
             // Draw shadow arc
             QLinearGradient shadow(0, 0, 100, 0);
             shadow.setColorAt(0.0, QColor(255, 255, 255, 255));
             shadow.setColorAt(1.0, QColor(255, 255, 255, 20));
 
-            QPen shadowPen(shadow, penWidth * 3);
+            const unsigned numberOfShadows = 5;
 
-            painter.setPen(shadowPen);
-
-            painter.drawArc(rect, 1440, mapped);
-
-            for (unsigned i = 2; i < 5; ++i)
+            for (unsigned i = 0; i < numberOfShadows; ++i)
             {
                 pen.setWidth(penWidth * i);
-                pen.setColor(QColor(255, 255, 255, 20 * (5 - i)));
+                pen.setColor(QColor(255, 255, 255, 20 * (numberOfShadows - i)));
                 pen.setCapStyle(Qt::FlatCap);
 
                 painter.setPen(pen);
-
-                painter.drawArc(rect, 1440, mapped);
+                painter.drawArc(rect, startArc, mappedAngel);
             }
+
+            painter.endNativePainting();
         }
 
     private:
         inline float angleOfDivision() const noexcept
         {
-            return qDegreesToRadians(_angleOfArc / static_cast<float>(_divisionsNumber));
+            return _angleOfArc / static_cast<float>(_divisionsNumber);
         }
 
     private:
@@ -217,11 +205,11 @@ namespace Ui
 
         bool _focused = false;
 
-        const int _divisionsNumber = 60;
+        const unsigned _divisionsNumber = 60;
         const float _angleOfArc = 360.f;
     };
 
 } // namespace Ui
 QT_END_NAMESPACE
 
-#endif // CLOCKWIDGET_H
+#endif // ANALOGCLOCK_H

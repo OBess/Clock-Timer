@@ -7,7 +7,7 @@ QT_BEGIN_NAMESPACE
 namespace Settings
 {
 
-    namespace INI
+    namespace Ini
     {
         [[maybe_unused]] const char *const FILE_PATH = "settings.ini";
 
@@ -15,6 +15,8 @@ namespace Settings
         [[maybe_unused]] const char *const IS_MAXIMIZED = "IsMaximized";
         [[maybe_unused]] const char *const WIDTH = "Width";
         [[maybe_unused]] const char *const HEIGHT = "Height";
+        [[maybe_unused]] const char *const POS_X = "PositionX";
+        [[maybe_unused]] const char *const POS_Y = "PositionY";
 
         [[maybe_unused]] const char *const HISTORY = "History";
         [[maybe_unused]] const char *const ITEM = "Item";
@@ -22,7 +24,7 @@ namespace Settings
         [[maybe_unused]] const char *const INTERVAL = "Interval";
 
         [[maybe_unused]] const char *const INVALID = "Invalid";
-    } // namespace INI
+    } // namespace Ini
 
     namespace Style
     {

@@ -8,7 +8,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui
 {
     class ClockTimerApp;
-    class ClockWidget;
+    class AnalogClock;
 }
 
 class HistoryModel;
@@ -26,7 +26,7 @@ private slots:
     void clearHistoryTable();
     void updateClocks();
     void startTimer();
-    void stopTimer();
+    void stopTimer(bool withTimeout);
     void restartTimer();
 
 private:
@@ -43,7 +43,7 @@ private:
 
     Ui::ClockTimerApp *ui = nullptr;
 
-    Ui::ClockWidget *_clockWidget = nullptr;
+    Ui::AnalogClock *_analogClock = nullptr;
 
     HistoryModel *_historyModel = nullptr;
 

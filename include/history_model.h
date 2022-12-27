@@ -2,6 +2,7 @@
 #define HISTORYMODEL_H
 
 #include <QAbstractTableModel>
+#include <QBrush>
 #include <QList>
 
 QT_BEGIN_NAMESPACE
@@ -62,11 +63,11 @@ public:
             switch (index.column())
             {
             case 0:
-                return QBrush(Qt::white);
+                return QColor(Qt::white);
                 break;
 
             case 1:
-                return QBrush("#ff8800");
+                return QColor(255, 135, 0);
                 break;
 
             default:
