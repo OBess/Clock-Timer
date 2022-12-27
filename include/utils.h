@@ -1,5 +1,5 @@
-#ifndef UTILITIES_H
-#define UTILITIES_H
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <QtMath>
 #include <QTime>
@@ -37,4 +37,4 @@ namespace Utils
 } // namespace Utils
 QT_END_NAMESPACE
 
-#endif // UTILITIES_H
+#endif // UTILS_H

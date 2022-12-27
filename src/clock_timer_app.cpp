@@ -10,7 +10,7 @@
 #include "history_model.h"
 #include "settings.h"
 #include "int_range_validator.h"
-#include "utilities.h"
+#include "utils.h"
 
 ClockTimerApp::ClockTimerApp(QWidget *parent)
     : QWidget(parent), ui(new Ui::ClockTimerApp)
