@@ -2,7 +2,7 @@
 #define HISTORYMODEL_H
 
 #include <QAbstractTableModel>
-#include <QBrush>
+#include <QColor>
 #include <QList>
 
 QT_BEGIN_NAMESPACE
