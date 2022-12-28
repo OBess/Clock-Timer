@@ -6,6 +6,7 @@
 #include <QList>
 
 QT_BEGIN_NAMESPACE
+/// @brief Extends QAbstractTableModel class to have a table with intervals history
 class HistoryModel : public QAbstractTableModel
 {
     Q_OBJECT

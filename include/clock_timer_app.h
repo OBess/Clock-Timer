@@ -14,12 +14,13 @@ namespace Ui
 class HistoryModel;
 QT_END_NAMESPACE
 
+/// @brief Extends QWidget class to show other widgets on the screen. The main object of the application
 class ClockTimerApp : public QWidget
 {
     Q_OBJECT
 
 public:
-    ClockTimerApp(QWidget *parent = nullptr);
+    explicit ClockTimerApp(QWidget *parent = nullptr);
     ~ClockTimerApp();
 
 private slots:
