@@ -29,7 +29,8 @@ public:
         return column;
     }
 
-    Q_INVOKABLE QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    Q_INVOKABLE QVariant data(const QModelIndex &index,
+                              int role = Qt::DisplayRole) const override
     {
         if (index.isValid() == false)
             return {};
@@ -80,12 +81,14 @@ public:
         return {};
     }
 
-    Q_INVOKABLE QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
+    Q_INVOKABLE QVariant headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override
     {
         return {};
     }
 
-    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override
+    Q_INVOKABLE bool insertRows(int row, int count,
+                                const QModelIndex &parent = QModelIndex()) override
     {
         if (row < 0 || count <= 0)
             return false;
@@ -102,21 +105,24 @@ public:
         return true;
     }
 
-    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override
+    Q_INVOKABLE bool removeRows(int row, int count,
+                                const QModelIndex &parent = QModelIndex()) override
     {
         if (row < 0 || count <= 0)
             return false;
 
         beginRemoveRows(parent, row, row + count - 1);
 
-        _items.erase(std::next(std::begin(_items), row), std::next(std::begin(_items), row + count));
+        _items.erase(std::next(std::begin(_items), row),
+                     std::next(std::begin(_items), row + count));
 
         endRemoveRows();
 
         return true;
     }
 
-    Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
+    Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value,
+                             int role = Qt::EditRole) override
     {
         if (index.isValid() == false || value.isValid() == false)
             return false;

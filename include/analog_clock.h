@@ -42,9 +42,9 @@ namespace Ui
         {
             const float angle = -angleOfDivision();
 
-            _mouseAngel = (angle * selectedTime.hour() * 60) 
-                        + (angle * selectedTime.minute()) 
-                        + (angle * selectedTime.second() / 60);
+            _mouseAngel = (angle * selectedTime.hour() * 60) +
+                          (angle * selectedTime.minute()) +
+                          (angle * selectedTime.second() / 60);
         }
 
         /// @brief Returns selected time in digital form
@@ -82,7 +82,8 @@ namespace Ui
             _mouseAngel = -Utils::VecProd(mainVec, mouseVec);
         }
 
-        /// @brief Clears the state of the widget when pressing the "Escape" keyboard button
+        /// @brief Clears the state of the widget when pressing
+        /// the "Escape" keyboard button
         /// @param event QKeyEvent
         void keyPressEvent(QKeyEvent *event) override
         {
@@ -121,7 +122,7 @@ namespace Ui
             // Moves painter to center
             painter.translate(_center);
 
-            // It saves the state of the painter to restore it after 
+            // It saves the state of the painter to restore it after
             painter.save();
 
             QPointF startHourDivision(0, -_radius * 0.85);
@@ -130,7 +131,8 @@ namespace Ui
 
             for (unsigned i = 0; i < _divisionsNumber; ++i)
             {
-                // If 'i' divides by 5 without a remainder, then draw a bolder line
+                // If 'i' divides by 5 without a remainder,
+                // then draw a bolder line
                 if (i % (_divisionsNumber / 12) == 0)
                 {
                     pen.setWidth(penWidth / 2);
@@ -185,8 +187,11 @@ namespace Ui
             const float entireArc = 5760.f;
             const float startArc = entireArc / 4.f;
 
-            const QRectF rect(-_radius, -_radius, _radius + _radius, _radius + _radius);
-            const float mappedAngel = Utils::Map(_mouseAngel, 0, 360.f, 0, entireArc);
+            const QRectF rect(-_radius, -_radius,
+                              _radius + _radius,
+                              _radius + _radius);
+            const float mappedAngel = Utils::Map(_mouseAngel, 0, 360.f,
+                                                 0, entireArc);
 
             pen.setWidth(penWidth);
             pen.setColor(Qt::white);
