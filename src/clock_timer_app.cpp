@@ -17,11 +17,8 @@ ClockTimerApp::ClockTimerApp(QWidget *parent)
 {
     ui->setupUi(this);
 
-    _clockHandler = new QTimer(this);
+    _clockHandler = QObject::startTimer(50);
     _timer = new QTimer(this);
-
-    _clockHandler->setInterval(50);
-    _clockHandler->start();
 
     setupUi();
     setupApp();
@@ -31,6 +28,8 @@ ClockTimerApp::ClockTimerApp(QWidget *parent)
 ClockTimerApp::~ClockTimerApp()
 {
     saveApp();
+
+    killTimer(_clockHandler);
 
     delete ui;
 }
@@ -71,7 +70,6 @@ inline void ClockTimerApp::setupConnections()
     QObject::connect(ui->btn_restart, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
     QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearHistoryTable);
 
-    QObject::connect(_clockHandler, &QTimer::timeout, this, &ClockTimerApp::updateClocks);
     QObject::connect(_timer, &QTimer::timeout, this, [this]{ stopTimer(true); });
 }
 
@@ -219,6 +217,17 @@ void ClockTimerApp::saveApp()
         settings.endArray();
 
         settings.endGroup();
+    }
+}
+
+void ClockTimerApp::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == _clockHandler)
+    {
+        if (isEnabled())
+        {
+            updateClocks();
+        }
     }
 }
 

@@ -59,6 +59,8 @@ private:
     /// @brief Saves properties of the widget to the .ini file
     void saveApp();
 
+    void timerEvent(QTimerEvent *event) override;
+
     /// @brief Generated class from .ui file
     Ui::ClockTimerApp *ui = nullptr;
 
@@ -66,7 +68,7 @@ private:
 
     HistoryModel *_historyModel = nullptr;
 
-    QTimer *_clockHandler = nullptr;
+    int _clockHandler = 0;
     QTimer *_timer = nullptr;
 
     int _selectedMilliseconds = 0;
