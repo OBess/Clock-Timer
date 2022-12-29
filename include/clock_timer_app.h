@@ -68,7 +68,9 @@ private:
 
     HistoryModel *_historyModel = nullptr;
 
+    /// @brief Timer identification for clock updates
     int _clockHandler = 0;
+    
     QTimer *_timer = nullptr;
 
     int _selectedMilliseconds = 0;
