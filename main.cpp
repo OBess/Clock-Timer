@@ -1,4 +1,4 @@
-#include "clocktimerapp.h"
+#include "clock_timer_app.h"
 
 #include <QApplication>
 

@@ -4,6 +4,7 @@
 #include <QValidator>
 
 QT_BEGIN_NAMESPACE
+/// @brief Extends QIntValidator class to filter input number out of range
 class IntRangeValidator : public QIntValidator
 {
     Q_OBJECT
@@ -23,14 +24,10 @@ public:
             return State::Acceptable;
         }
 
-        bool isOk = false;
-
-        if (input.toInt(&isOk) > top())
-        {
-            return State::Invalid;
-        }
-
-        if (isOk == false)
+        // If the input number is out of range, then the state is invalid
+        if (bool isOk = false;
+            isOk == false || input.toInt(&isOk) > top() ||
+            input.toInt(&isOk) < bottom())
         {
             return State::Invalid;
         }
