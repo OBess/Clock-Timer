@@ -23,6 +23,10 @@ QPushButton:pressed {
   background-color: white;
 }
 
+QPushButton:disabled {
+  color: #808080;
+}
+
 QTableView {
   border: 1px solid #888;
 }
