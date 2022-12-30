@@ -40,3 +40,20 @@ QLabel#lbl_history {
   color: #888;
   border: 1px solid #888;
 }
+
+QTabWidget {
+    border: none;
+    margin: 0;
+}
+
+QTabBar {
+    qproperty-drawBase: 0;
+}
+
+QTabBar::tab {
+    background: rgba(0, 0, 0, 0);
+}
+
+QTabBar::tab:selected {
+    background: #212121;
+}

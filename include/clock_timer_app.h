@@ -98,5 +98,13 @@ private:
     int _intervalForClockHandler = 50;
 
     bool _timerIsExecuting = false;
+
+#ifdef Q_OS_ANDROID
+
+    int _historyTabID = 0;
+
+    int _clockTabID = 0;
+
+#endif // Q_OS_ANDROID
 };
 #endif // CLOCKTIMERAPP_H

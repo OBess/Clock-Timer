@@ -4,6 +4,7 @@
 #include <QLineEdit>
 #include <QScreen>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QTextStream>
 
 #include "analog_clock.h"
@@ -113,7 +114,7 @@ void ClockTimerApp::updateClocks()
 
     // Enables the 'Unselect' button if the analog or digital clock is focused.
     // The 'Unselect' button is disabled by default
-    if (digitTimerHasFocus() || _analogClock->focused())
+    if ((digitTimerHasFocus() || _analogClock->focused()) && _timerIsExecuting == false)
     {
         ui->btn_unselect->setEnabled(true);
     }
@@ -197,8 +198,8 @@ void ClockTimerApp::stopTimer(bool withTimeout)
 
     _timer->stop();
 
-    ui->btn_start->show();
     ui->btn_stop->hide();
+    ui->btn_start->show();
 
     _analogClock->clearSelected();
 
@@ -229,6 +230,53 @@ void ClockTimerApp::setupUi()
     // Create AnalogClock instance and add to the previously created layout
     _analogClock = new Ui::AnalogClock(ui->widget_clock);
     widgetClockLayout->addWidget(_analogClock);
+
+#ifdef Q_OS_ANDROID // Adds tabs for separate different widgets on android device
+
+    QTabWidget* tabWidget = new QTabWidget(this);
+
+    tabWidget->setDocumentMode(true);
+    tabWidget->tabBar()->setExpanding(true);
+
+    layout()->addWidget(tabWidget);
+
+    // Creates clock/timer tab
+    QWidget* clock_timerWidget = new QWidget;
+
+    ui->layout_main->removeItem(ui->layout_clock);
+    clock_timerWidget->setLayout(ui->layout_clock);
+
+    _clockTabID = tabWidget->addTab(clock_timerWidget, "Clock/Timer");
+
+    // Creates history tab
+    QWidget* historyWidget = new QWidget;
+
+    QPushButton* btn_save = new QPushButton(clock_timerWidget);
+    btn_save->setText("Save");
+    QObject::connect(btn_save, &QPushButton::clicked, this, &ClockTimerApp::saveApp);
+
+    QPushButton* btn_load = new QPushButton(clock_timerWidget);
+    btn_load->setText("Load");
+    QObject::connect(btn_load, &QPushButton::clicked, this, &ClockTimerApp::setupApp);
+
+    ui->layout_main->removeItem(ui->layout_history);
+    historyWidget->setLayout(ui->layout_history);
+
+    ui->layout_history->addWidget(btn_save);
+    ui->layout_history->addWidget(btn_load);
+
+    _historyTabID = tabWidget->addTab(historyWidget, "History");
+
+    // Removes unnecessary space items
+    ui->layout_main->removeItem(ui->hs_left);
+    ui->layout_main->removeItem(ui->hs_center);
+    ui->layout_main->removeItem(ui->hs_right);
+
+    delete ui->hs_left;
+    delete ui->hs_center;
+    delete ui->hs_right;
+
+#endif // Q_OS_ANDROID
 
     // Load CSS2 stylesheet from internal file and setup style to the current object
     setupStyle();
@@ -262,8 +310,14 @@ void ClockTimerApp::setupStyle()
 
 void ClockTimerApp::setupApp()
 {
+#ifdef Q_OS_ANDROID
+    QSettings settings("assets:/" + QString(Settings::Ini::FILE_PATH), QSettings::IniFormat);
+//    QSettings settings(QSettings::IniFormat, QSettings::SystemScope, "OBess", "ClockTimerApp");
+#else
     QSettings settings(Settings::Ini::FILE_PATH, QSettings::IniFormat);
+#endif // Q_OS_ANDROID
 
+#ifndef Q_OS_ANDROID
     settings.beginGroup(Settings::Ini::MAIN_WINDOW);
 
     if (settings.value(Settings::Ini::IS_MAXIMIZED, false).toBool())
@@ -303,6 +357,7 @@ void ClockTimerApp::setupApp()
     }
 
     settings.endGroup();
+#endif // Q_OS_ANDROID
 
     // Read items to add them to table history
     settings.beginGroup(Settings::Ini::HISTORY);
@@ -331,8 +386,14 @@ void ClockTimerApp::setupApp()
 
 void ClockTimerApp::saveApp()
 {
+#ifdef Q_OS_ANDROID
+    QSettings settings("assets:/" + QString(Settings::Ini::FILE_PATH), QSettings::IniFormat);
+//    QSettings settings(QSettings::IniFormat, QSettings::SystemScope, "OBess", "ClockTimerApp");
+#else
     QSettings settings(Settings::Ini::FILE_PATH, QSettings::IniFormat);
+#endif // Q_OS_ANDROID
 
+#ifndef Q_OS_ANDROID
     settings.beginGroup(Settings::Ini::MAIN_WINDOW);
 
     settings.setValue(Settings::Ini::IS_MAXIMIZED, isMaximized());
@@ -342,6 +403,7 @@ void ClockTimerApp::saveApp()
     settings.setValue(Settings::Ini::POS_Y, pos().y() - 38); // 38 it is the height of title bar
 
     settings.endGroup();
+#endif // Q_OS_ANDROID
 
     // Save history only if there is at least one item,
     // otherwise just remove group if there it is
@@ -370,4 +432,6 @@ void ClockTimerApp::saveApp()
 
         settings.endGroup();
     }
+
+    settings.sync();
 }
