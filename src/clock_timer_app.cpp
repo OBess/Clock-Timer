@@ -34,7 +34,7 @@ ClockTimerApp::~ClockTimerApp()
     delete ui;
 }
 
-inline void ClockTimerApp::setupUi()
+void ClockTimerApp::setupUi()
 {
     // Hide "Stop" button, we will see this when clicked "Start" button
     ui->btn_stop->hide();
@@ -63,7 +63,7 @@ inline void ClockTimerApp::setupUi()
     setupStyle();
 }
 
-inline void ClockTimerApp::setupConnections()
+void ClockTimerApp::setupConnections()
 {
     QObject::connect(ui->btn_start, &QPushButton::clicked, this, &ClockTimerApp::startTimer);
     QObject::connect(ui->btn_stop, &QPushButton::clicked, this, [this]{ stopTimer(false); });
@@ -74,7 +74,7 @@ inline void ClockTimerApp::setupConnections()
     QObject::connect(_timer, &QTimer::timeout, this, [this]{ stopTimer(true); });
 }
 
-inline void ClockTimerApp::setupStyle()
+void ClockTimerApp::setupStyle()
 {
     if (QFile file(Settings::Style::MAIN_STYLE); file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -83,6 +83,19 @@ inline void ClockTimerApp::setupStyle()
 
         QTextStream in(&file);
         setStyleSheet(in.readAll());
+    }
+}
+
+void ClockTimerApp::startTimerIfSelected()
+{
+    if (_selectedMilliseconds > 0)
+    {
+        ui->btn_start->hide();
+        ui->btn_stop->show();
+
+        _timer->start(_selectedMilliseconds);
+
+        _timerIsExecuting = true;
     }
 }
 
@@ -236,6 +249,10 @@ void ClockTimerApp::updateClocks()
 {
     _analogClock->repaint();
 
+    // Enables the 'Unselect' button if the analog clock is focused.
+    // The 'Unselect' button is disabled by default
+    bool enableUnselect = false;
+
     if (_timerIsExecuting)
     {
         _analogClock->setSelectedTime(Utils::MillsToTime(_timer->remainingTime()));
@@ -244,12 +261,16 @@ void ClockTimerApp::updateClocks()
     }
     else if (_analogClock->focused())
     {
+        enableUnselect = true;
+
         updateDigitTime(_analogClock->getSelectedTime());
     }
     else
     {
         updateDigitTime(QTime::currentTime());
     }
+
+    ui->btn_unselect->setEnabled(enableUnselect);
 }
 
 void ClockTimerApp::startTimer()
@@ -259,14 +280,14 @@ void ClockTimerApp::startTimer()
         return;
     }
 
-    ui->btn_start->hide();
-    ui->btn_stop->show();
-
     _selectedMilliseconds = Utils::TimeToMills(_analogClock->getSelectedTime());
 
-    _timer->start(_selectedMilliseconds);
+    startTimerIfSelected();
+}
 
-    _timerIsExecuting = true;
+void ClockTimerApp::restartTimer()
+{
+    startTimerIfSelected();
 }
 
 void ClockTimerApp::stopTimer(bool withTimeout)
@@ -293,19 +314,4 @@ void ClockTimerApp::stopTimer(bool withTimeout)
     _analogClock->clearSelected();
 
     _timerIsExecuting = false;
-}
-
-void ClockTimerApp::restartTimer()
-{
-    if (_timerIsExecuting)
-    {
-        return;
-    }
-
-    _timer->start(_selectedMilliseconds);
-
-    ui->btn_start->hide();
-    ui->btn_stop->show();
-
-    _timerIsExecuting = true;
 }

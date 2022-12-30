@@ -45,6 +45,9 @@ private:
     /// @brief Loads CSS2 styles from files and setups them for widgets
     void setupStyle();
 
+    /// @brief Starts timer if selected milliseconds are greater than zero
+    void startTimerIfSelected();
+
     /// @brief Gets time and sets it to like an interval into the table
     /// @param time QTime
     void insertIntervalToTable(QTime time);
