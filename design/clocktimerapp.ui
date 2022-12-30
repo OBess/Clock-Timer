@@ -212,9 +212,6 @@
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
            <property name="placeholderText">
             <string>Minute</string>
            </property>
@@ -252,9 +249,6 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
            </property>
            <property name="placeholderText">
             <string>Second</string>
@@ -354,6 +348,37 @@
          </property>
          <property name="text">
           <string>Restart</string>
+         </property>
+        </widget>
+       </item>
+       <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="btn_unselect">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>251</width>
+           <height>51</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>Unselect</string>
          </property>
         </widget>
        </item>

@@ -1,6 +1,7 @@
 #ifndef CLOCKTIMERAPP_H
 #define CLOCKTIMERAPP_H
 
+#include <QKeyEvent>
 #include <QTimer>
 #include <QWidget>
 
@@ -25,25 +26,32 @@ public:
     ~ClockTimerApp();
 
 private slots:
-    void clearHistoryTable();
+    /// @brief Updates the analog clock selected time corresponding to the digital clock
+    void digitClockEdited(const QString &text);
 
     /// @brief Repaints the analog clock and updates the digital clock
     void updateClocks();
 
+    void clearHistoryTable();
+
+    /// @brief Clears all focus on clocks and selected time
+    void unselect();
+
     /// @brief Starts timer corresponding to the saved selected time
     void startTimer();
-
-    void stopTimer(bool withTimeout);
 
     /// @brief Restarts the timer corresponding to the saved selected time
     void restartTimer();
 
-private:
-    void setupUi();
-    void setupConnections();
+    void stopTimer(bool withTimeout);
 
-    /// @brief Loads CSS2 styles from files and setups them for widgets
-    void setupStyle();
+private:
+    void timerEvent(QTimerEvent *event) override;
+
+    /// @brief Clears the state of the widget when pressing
+    /// the "Escape" keyboard button
+    /// @param event QKeyEvent
+    void keyPressEvent(QKeyEvent *event) override;
 
     /// @brief Gets time and sets it to like an interval into the table
     /// @param time QTime
@@ -53,13 +61,25 @@ private:
     /// @param time QTime
     void updateDigitTime(QTime time);
 
+    void clearFocusOnDigitTimer();
+
+    bool digitTimerHasFocus() noexcept;
+
+    /// @brief Starts timer if selected milliseconds are greater than zero
+    void startTimerIfSelected();
+
+    void setupUi();
+
+    void setupConnections();
+
+    /// @brief Loads CSS2 styles from files and setups them for widgets
+    void setupStyle();
+
     /// @brief Loads data from the .ini file and setups properties to the widget
     void setupApp();
 
     /// @brief Saves properties of the widget to the .ini file
     void saveApp();
-
-    void timerEvent(QTimerEvent *event) override;
 
     /// @brief Generated class from .ui file
     Ui::ClockTimerApp *ui = nullptr;
