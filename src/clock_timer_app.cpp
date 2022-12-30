@@ -35,64 +35,31 @@ ClockTimerApp::~ClockTimerApp()
     delete ui;
 }
 
-void ClockTimerApp::setupUi()
+void ClockTimerApp::timerEvent(QTimerEvent *event)
 {
-    // Hide "Stop" button, we will see this when clicked "Start" button
-    ui->btn_stop->hide();
-
-    // Add some stretching to cells in History table
-    ui->table_history->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->table_history->horizontalHeader()->setStretchLastSection(true);
-
-    // Create and set History model to History table
-    _historyModel = new HistoryModel(this);
-    ui->table_history->setModel(_historyModel);
-
-    // Setup validator to line editos that represent digital clock
-    ui->le_hour->setValidator(new IntRangeValidator(0, 11, this));
-    ui->le_minute->setValidator(new IntRangeValidator(0, 59, this));
-    ui->le_second->setValidator(new IntRangeValidator(0, 59, this));
-
-    // Set layout to dummy widget
-    QHBoxLayout *widgetClockLayout = new QHBoxLayout(ui->widget_clock);
-
-    // Create AnalogClock instance and add to the previously created layout
-    _analogClock = new Ui::AnalogClock(ui->widget_clock);
-    widgetClockLayout->addWidget(_analogClock);
-
-    // Load CSS2 stylesheet from internal file and setup style to the current object
-    setupStyle();
-}
-
-void ClockTimerApp::setupConnections()
-{
-    QObject::connect(ui->btn_start, &QPushButton::clicked, this, &ClockTimerApp::startTimer);
-    QObject::connect(ui->btn_stop, &QPushButton::clicked, this, [this]{ stopTimer(false); });
-    QObject::connect(ui->btn_restart, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
-    QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearHistoryTable);
-    QObject::connect(ui->btn_unselect, &QPushButton::clicked, this, &ClockTimerApp::unselect);
-
-    QObject::connect(ui->le_minute, &QLineEdit::textEdited, this, &ClockTimerApp::digitClockEdited);
-    QObject::connect(ui->le_second, &QLineEdit::textEdited, this, &ClockTimerApp::digitClockEdited);
-
-    QObject::connect(_timer, &QTimer::timeout, this, [this]{ stopTimer(true); });
-}
-
-void ClockTimerApp::setupStyle()
-{
-    if (QFile file(Settings::Style::MAIN_STYLE); file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (event->timerId() == _clockHandler)
     {
-        if (file.size() == 0)
-            return;
-
-        QTextStream in(&file);
-        setStyleSheet(in.readAll());
+        if (isEnabled())
+        {
+            updateClocks();
+        }
     }
 }
 
-void ClockTimerApp::clearHistoryTable()
+void ClockTimerApp::digitClockEdited(const QString &text)
 {
-    _historyModel->removeRows(0, _historyModel->rowCount());
+    if (text.isEmpty())
+    {
+        return;
+    }
+
+    ui->btn_unselect->setEnabled(true);
+
+    ui->le_hour->setText("0");
+
+    _analogClock->setSelectedTime(QTime(ui->le_hour->text().toInt(),
+                                        ui->le_minute->text().toInt(),
+                                        ui->le_second->text().toInt()));
 }
 
 void ClockTimerApp::insertIntervalToTable(QTime time)
@@ -103,17 +70,6 @@ void ClockTimerApp::insertIntervalToTable(QTime time)
 
         _historyModel->setData(_historyModel->index(row, 0), QDateTime::currentDateTime().toString());
         _historyModel->setData(_historyModel->index(row, 1), time.toString());
-    }
-}
-
-void ClockTimerApp::timerEvent(QTimerEvent *event)
-{
-    if (event->timerId() == _clockHandler)
-    {
-        if (isEnabled())
-        {
-            updateClocks();
-        }
     }
 }
 
@@ -158,6 +114,30 @@ void ClockTimerApp::updateClocks()
     {
         ui->btn_unselect->setEnabled(false);
     }
+}
+
+void ClockTimerApp::clearFocusOnDigitTimer()
+{
+    ui->le_hour->clearFocus();
+    ui->le_minute->clearFocus();
+    ui->le_second->clearFocus();
+}
+
+bool ClockTimerApp::digitTimerHasFocus() noexcept
+{
+    return ui->le_hour->hasFocus() || ui->le_minute->hasFocus() || ui->le_second->hasFocus();
+}
+
+void ClockTimerApp::clearHistoryTable()
+{
+    _historyModel->removeRows(0, _historyModel->rowCount());
+}
+
+void ClockTimerApp::unselect()
+{
+    _analogClock->clearSelected();
+
+    clearFocusOnDigitTimer();
 }
 
 void ClockTimerApp::startTimerIfSelected()
@@ -218,39 +198,59 @@ void ClockTimerApp::stopTimer(bool withTimeout)
     _timerIsExecuting = false;
 }
 
-void ClockTimerApp::digitClockEdited(const QString &text)
+void ClockTimerApp::setupUi()
 {
-    if (text.isEmpty())
+    // Hide "Stop" button, we will see this when clicked "Start" button
+    ui->btn_stop->hide();
+
+    // Add some stretching to cells in History table
+    ui->table_history->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->table_history->horizontalHeader()->setStretchLastSection(true);
+
+    // Create and set History model to History table
+    _historyModel = new HistoryModel(this);
+    ui->table_history->setModel(_historyModel);
+
+    // Setup validator to line editos that represent digital clock
+    ui->le_hour->setValidator(new IntRangeValidator(0, 11, this));
+    ui->le_minute->setValidator(new IntRangeValidator(0, 59, this));
+    ui->le_second->setValidator(new IntRangeValidator(0, 59, this));
+
+    // Set layout to dummy widget
+    QHBoxLayout *widgetClockLayout = new QHBoxLayout(ui->widget_clock);
+
+    // Create AnalogClock instance and add to the previously created layout
+    _analogClock = new Ui::AnalogClock(ui->widget_clock);
+    widgetClockLayout->addWidget(_analogClock);
+
+    // Load CSS2 stylesheet from internal file and setup style to the current object
+    setupStyle();
+}
+
+void ClockTimerApp::setupConnections()
+{
+    QObject::connect(ui->btn_start, &QPushButton::clicked, this, &ClockTimerApp::startTimer);
+    QObject::connect(ui->btn_stop, &QPushButton::clicked, this, [this]{ stopTimer(false); });
+    QObject::connect(ui->btn_restart, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
+    QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearHistoryTable);
+    QObject::connect(ui->btn_unselect, &QPushButton::clicked, this, &ClockTimerApp::unselect);
+
+    QObject::connect(ui->le_minute, &QLineEdit::textEdited, this, &ClockTimerApp::digitClockEdited);
+    QObject::connect(ui->le_second, &QLineEdit::textEdited, this, &ClockTimerApp::digitClockEdited);
+
+    QObject::connect(_timer, &QTimer::timeout, this, [this]{ stopTimer(true); });
+}
+
+void ClockTimerApp::setupStyle()
+{
+    if (QFile file(Settings::Style::MAIN_STYLE); file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        return;
+        if (file.size() == 0)
+            return;
+
+        QTextStream in(&file);
+        setStyleSheet(in.readAll());
     }
-
-    ui->btn_unselect->setEnabled(true);
-
-    ui->le_hour->setText("0");
-
-    _analogClock->setSelectedTime(QTime(ui->le_hour->text().toInt(),
-                                        ui->le_minute->text().toInt(),
-                                        ui->le_second->text().toInt()));
-}
-
-void ClockTimerApp::clearFocusOnDigitTimer()
-{
-    ui->le_hour->clearFocus();
-    ui->le_minute->clearFocus();
-    ui->le_second->clearFocus();
-}
-
-bool ClockTimerApp::digitTimerHasFocus() noexcept
-{
-    return ui->le_hour->hasFocus() || ui->le_minute->hasFocus() || ui->le_second->hasFocus();
-}
-
-void ClockTimerApp::unselect()
-{
-    _analogClock->clearSelected();
-
-    clearFocusOnDigitTimer();
 }
 
 void ClockTimerApp::setupApp()
