@@ -69,6 +69,7 @@ inline void ClockTimerApp::setupConnections()
     QObject::connect(ui->btn_stop, &QPushButton::clicked, this, [this]{ stopTimer(false); });
     QObject::connect(ui->btn_restart, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
     QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearHistoryTable);
+    QObject::connect(ui->btn_unselect, &QPushButton::clicked, _analogClock, &Ui::AnalogClock::clearSelected);
 
     QObject::connect(_timer, &QTimer::timeout, this, [this]{ stopTimer(true); });
 }
