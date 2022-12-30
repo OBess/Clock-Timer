@@ -38,6 +38,12 @@ private slots:
     /// @brief Restarts the timer corresponding to the saved selected time
     void restartTimer();
 
+    /// @brief Updates the analog clock selected time corresponding to the digital clock
+    void digitClockEdited(const QString &text);
+
+    /// @brief Clears all focus on clocks and selected time
+    void unselect();
+
 private:
     void setupUi();
     void setupConnections();
@@ -55,6 +61,10 @@ private:
     /// @brief Updates line editors corresponding to the clock or selected time
     /// @param time QTime
     void updateDigitTime(QTime time);
+
+    void clearFocusOnDigitTimer();
+
+    bool digitTimerHasFocus() noexcept;
 
     /// @brief Loads data from the .ini file and setups properties to the widget
     void setupApp();

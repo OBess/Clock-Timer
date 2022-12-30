@@ -26,8 +26,8 @@ public:
 
         // If the input number is out of range, then the state is invalid
         if (bool isOk = false;
-            isOk == false || input.toInt(&isOk) > top() ||
-            input.toInt(&isOk) < bottom())
+            input.toInt(&isOk) > top() ||
+            input.toInt(&isOk) < bottom() || isOk == false)
         {
             return State::Invalid;
         }

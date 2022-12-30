@@ -45,6 +45,8 @@ namespace Ui
             _mouseAngel = (angle * selectedTime.hour() * 60) +
                           (angle * selectedTime.minute()) +
                           (angle * selectedTime.second() / 60);
+
+            _focused = true;
         }
 
         /// @brief Returns selected time in digital form
@@ -80,17 +82,6 @@ namespace Ui
             const QPointF mouseVec(event->localPos() - _center);
 
             _mouseAngel = -Utils::VecProd(mainVec, mouseVec);
-        }
-
-        /// @brief Clears the state of the widget when pressing
-        /// the "Escape" keyboard button
-        /// @param event QKeyEvent
-        void keyPressEvent(QKeyEvent *event) override
-        {
-            if (event->key() == Qt::Key_Escape)
-            {
-                clearSelected();
-            }
         }
 
         /// @brief Paints analog clock on the widget
