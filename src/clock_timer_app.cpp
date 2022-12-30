@@ -111,7 +111,7 @@ void ClockTimerApp::updateClocks()
         updateDigitTime(QTime::currentTime());
     }
 
-    // Enables the 'Unselect' button if the analog or digit clock is focused.
+    // Enables the 'Unselect' button if the analog or digital clock is focused.
     // The 'Unselect' button is disabled by default
     if (digitTimerHasFocus() || _analogClock->focused())
     {
