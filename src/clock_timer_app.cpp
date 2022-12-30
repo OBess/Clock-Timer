@@ -1,7 +1,6 @@
 #include "clock_timer_app.h"
 #include "./ui_clocktimerapp.h"
 
-#include <QDebug>
 #include <QLineEdit>
 #include <QScreen>
 #include <QSettings>
@@ -43,6 +42,14 @@ void ClockTimerApp::timerEvent(QTimerEvent *event)
         {
             updateClocks();
         }
+    }
+}
+
+void ClockTimerApp::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+    {
+        unselect();
     }
 }
 

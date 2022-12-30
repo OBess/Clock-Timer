@@ -1,6 +1,7 @@
 #ifndef CLOCKTIMERAPP_H
 #define CLOCKTIMERAPP_H
 
+#include <QKeyEvent>
 #include <QTimer>
 #include <QWidget>
 
@@ -46,6 +47,11 @@ private slots:
 
 private:
     void timerEvent(QTimerEvent *event) override;
+
+    /// @brief Clears the state of the widget when pressing
+    /// the "Escape" keyboard button
+    /// @param event QKeyEvent
+    void keyPressEvent(QKeyEvent *event) override;
 
     /// @brief Gets time and sets it to like an interval into the table
     /// @param time QTime
