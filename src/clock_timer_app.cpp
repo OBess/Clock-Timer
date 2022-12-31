@@ -272,7 +272,7 @@ void ClockTimerApp::setupUi()
     // For history finger scroller
     QScroller::grabGesture(ui->table_history, QScroller::LeftMouseButtonGesture);
 
-    // Only number keyboard
+    // Only number keyboard for line editors
     ui->le_hour->setInputMethodHints(Qt::ImhPreferNumbers);
     ui->le_minute->setInputMethodHints(Qt::ImhPreferNumbers);
     ui->le_second->setInputMethodHints(Qt::ImhPreferNumbers);
