@@ -1,7 +1,6 @@
 QWidget {
   background: #121212;
   color: white;
-  border: none;
   border-radius: 2px;
 }
 
@@ -10,8 +9,13 @@ QLineEdit {
 }
 
 QPushButton {
-  border: 1px solid #121212;
+  border: none;
   font-weight: bold;
+}
+
+QPushButton:focus {
+  border: none;
+  outline: none;
 }
 
 QPushButton:hover {
@@ -28,12 +32,20 @@ QPushButton:disabled {
 }
 
 QTableView {
-  border: 1px solid #888;
+    outline: none;
+    border: none;
 }
 
 QTableView::item:selected {
   color: #121212;
   background-color: white;
+  border: none;
+  outline: none;
+}
+
+QTableView::item:focus {
+  border: none;
+  outline: none;
 }
 
 QLabel#lbl_history {
@@ -48,12 +60,19 @@ QTabWidget {
 
 QTabBar {
     qproperty-drawBase: 0;
+    border: none;
+    outline: none;
 }
 
 QTabBar::tab {
-    background: rgba(0, 0, 0, 0);
+    background: #212121;
 }
 
 QTabBar::tab:selected {
-    background: #212121;
+    background: rgba(0, 0, 0, 0);
+}
+
+QTabBar::tab:focus {
+    border: none;
+    outline: none;
 }
