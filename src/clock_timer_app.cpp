@@ -3,6 +3,7 @@
 
 #include <QLineEdit>
 #include <QScreen>
+#include <QScroller>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
@@ -268,6 +269,10 @@ void ClockTimerApp::setupUi()
     // Customizations
     ui->lbl_history->setAlignment(Qt::AlignHCenter);
 
+    // For history finger scroller
+    QScroller::grabGesture(ui->table_history, QScroller::LeftMouseButtonGesture);
+
+    // Only number keyboard
     ui->le_hour->setInputMethodHints(Qt::ImhPreferNumbers);
     ui->le_minute->setInputMethodHints(Qt::ImhPreferNumbers);
     ui->le_second->setInputMethodHints(Qt::ImhPreferNumbers);
