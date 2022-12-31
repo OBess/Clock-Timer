@@ -251,19 +251,8 @@ void ClockTimerApp::setupUi()
     // Creates history tab
     QWidget* historyWidget = new QWidget;
 
-    QPushButton* btn_save = new QPushButton(clock_timerWidget);
-    btn_save->setText("Save");
-    QObject::connect(btn_save, &QPushButton::clicked, this, &ClockTimerApp::saveApp);
-
-    QPushButton* btn_load = new QPushButton(clock_timerWidget);
-    btn_load->setText("Load");
-    QObject::connect(btn_load, &QPushButton::clicked, this, &ClockTimerApp::setupApp);
-
     ui->layout_main->removeItem(ui->layout_history);
     historyWidget->setLayout(ui->layout_history);
-
-    ui->layout_history->addWidget(btn_save);
-    ui->layout_history->addWidget(btn_load);
 
     _historyTabID = tabWidget->addTab(historyWidget, "History");
 
@@ -275,6 +264,13 @@ void ClockTimerApp::setupUi()
     delete ui->hs_left;
     delete ui->hs_center;
     delete ui->hs_right;
+
+    // Customizations
+    ui->lbl_history->setAlignment(Qt::AlignHCenter);
+
+    ui->le_hour->setInputMethodHints(Qt::ImhPreferNumbers);
+    ui->le_minute->setInputMethodHints(Qt::ImhPreferNumbers);
+    ui->le_second->setInputMethodHints(Qt::ImhPreferNumbers);
 
 #endif // Q_OS_ANDROID
 
