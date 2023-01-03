@@ -1,11 +1,14 @@
 #include "clock_timer_app.h"
 #include "./ui_clocktimerapp.h"
 
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QScreen>
+#include <QScroller>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QTimer>
 
 #include "analog_clock.h"
 #include "history_model.h"
@@ -28,7 +31,9 @@ ClockTimerApp::ClockTimerApp(QWidget *parent)
 
 ClockTimerApp::~ClockTimerApp()
 {
+#ifndef Q_OS_ANDROID
     saveApp();
+#endif // Q_OS_ANDROID
 
     killTimer(_clockHandler);
 
@@ -54,6 +59,19 @@ void ClockTimerApp::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void ClockTimerApp::onAppStateChange(Qt::ApplicationState state)
+{
+#ifdef Q_OS_ANDROID
+    // When user hide application on android OS
+    if (state == Qt::ApplicationInactive ||
+        state == Qt::ApplicationSuspended ||
+        state == Qt::ApplicationHidden)
+    {
+        saveAndroidApp();
+    }
+#endif // Q_OS_ANDROID
+}
+
 void ClockTimerApp::digitClockEdited(const QString &text)
 {
     if (text.isEmpty())
@@ -72,12 +90,17 @@ void ClockTimerApp::digitClockEdited(const QString &text)
 
 void ClockTimerApp::insertIntervalToTable(QTime time)
 {
-    if(_historyModel->insertRow(_historyModel->rowCount()))
+    if (_historyModel->insertRow(_historyModel->rowCount()))
     {
         const int row = _historyModel->rowCount() - 1;
 
-        _historyModel->setData(_historyModel->index(row, 0), QDateTime::currentDateTime().toString());
+        const auto dateTime = QDateTime::currentDateTime().toString();
+
+        _historyModel->setData(_historyModel->index(row, 0), dateTime);
         _historyModel->setData(_historyModel->index(row, 1), time.toString());
+
+        // Marks that data changed in the table
+        _dataChanged = true;
     }
 }
 
@@ -139,6 +162,9 @@ bool ClockTimerApp::digitTimerHasFocus() noexcept
 void ClockTimerApp::clearHistoryTable()
 {
     _historyModel->removeRows(0, _historyModel->rowCount());
+
+    // Marks that data changed in the table
+    _dataChanged = true;
 }
 
 void ClockTimerApp::unselect()
@@ -233,7 +259,7 @@ void ClockTimerApp::setupUi()
 
 #ifdef Q_OS_ANDROID // Adds tabs for separate different widgets on android device
 
-    QTabWidget* tabWidget = new QTabWidget(this);
+    QTabWidget *tabWidget = new QTabWidget(this);
 
     tabWidget->setDocumentMode(true);
     tabWidget->tabBar()->setExpanding(true);
@@ -241,20 +267,20 @@ void ClockTimerApp::setupUi()
     layout()->addWidget(tabWidget);
 
     // Creates clock/timer tab
-    QWidget* clock_timerWidget = new QWidget;
+    QWidget *clock_timerWidget = new QWidget;
 
     ui->layout_main->removeItem(ui->layout_clock);
     clock_timerWidget->setLayout(ui->layout_clock);
 
-    _clockTabID = tabWidget->addTab(clock_timerWidget, "Clock/Timer");
+    const auto clockTabID = tabWidget->addTab(clock_timerWidget, "Clock/Timer");
 
     // Creates history tab
-    QWidget* historyWidget = new QWidget;
+    QWidget *historyWidget = new QWidget;
 
     ui->layout_main->removeItem(ui->layout_history);
     historyWidget->setLayout(ui->layout_history);
 
-    _historyTabID = tabWidget->addTab(historyWidget, "History");
+    const auto historyTabID = tabWidget->addTab(historyWidget, "History");
 
     // Removes unnecessary space items
     ui->layout_main->removeItem(ui->hs_left);
@@ -268,6 +294,10 @@ void ClockTimerApp::setupUi()
     // Customizations
     ui->lbl_history->setAlignment(Qt::AlignHCenter);
 
+    // For history finger scroller
+    QScroller::grabGesture(ui->table_history, QScroller::LeftMouseButtonGesture);
+
+    // Only number keyboard for line editors
     ui->le_hour->setInputMethodHints(Qt::ImhPreferNumbers);
     ui->le_minute->setInputMethodHints(Qt::ImhPreferNumbers);
     ui->le_second->setInputMethodHints(Qt::ImhPreferNumbers);
@@ -281,7 +311,8 @@ void ClockTimerApp::setupUi()
 void ClockTimerApp::setupConnections()
 {
     QObject::connect(ui->btn_start, &QPushButton::clicked, this, &ClockTimerApp::startTimer);
-    QObject::connect(ui->btn_stop, &QPushButton::clicked, this, [this]{ stopTimer(false); });
+    QObject::connect(ui->btn_stop, &QPushButton::clicked, this, [this]
+                     { stopTimer(false); });
     QObject::connect(ui->btn_restart, &QPushButton::clicked, this, &ClockTimerApp::restartTimer);
     QObject::connect(ui->btn_clear, &QPushButton::clicked, this, &ClockTimerApp::clearHistoryTable);
     QObject::connect(ui->btn_unselect, &QPushButton::clicked, this, &ClockTimerApp::unselect);
@@ -289,7 +320,8 @@ void ClockTimerApp::setupConnections()
     QObject::connect(ui->le_minute, &QLineEdit::textEdited, this, &ClockTimerApp::digitClockEdited);
     QObject::connect(ui->le_second, &QLineEdit::textEdited, this, &ClockTimerApp::digitClockEdited);
 
-    QObject::connect(_timer, &QTimer::timeout, this, [this]{ stopTimer(true); });
+    QObject::connect(_timer, &QTimer::timeout, this, [this]
+                     { stopTimer(true); });
 }
 
 void ClockTimerApp::setupStyle()
@@ -306,12 +338,7 @@ void ClockTimerApp::setupStyle()
 
 void ClockTimerApp::setupApp()
 {
-#ifdef Q_OS_ANDROID
-    QSettings settings("assets:/" + QString(Settings::Ini::FILE_PATH), QSettings::IniFormat);
-//    QSettings settings(QSettings::IniFormat, QSettings::SystemScope, "OBess", "ClockTimerApp");
-#else
     QSettings settings(Settings::Ini::FILE_PATH, QSettings::IniFormat);
-#endif // Q_OS_ANDROID
 
 #ifndef Q_OS_ANDROID
     settings.beginGroup(Settings::Ini::MAIN_WINDOW);
@@ -380,27 +407,8 @@ void ClockTimerApp::setupApp()
     settings.endGroup();
 }
 
-void ClockTimerApp::saveApp()
+void ClockTimerApp::saveHistory(QSettings &settings)
 {
-#ifdef Q_OS_ANDROID
-    QSettings settings("assets:/" + QString(Settings::Ini::FILE_PATH), QSettings::IniFormat);
-//    QSettings settings(QSettings::IniFormat, QSettings::SystemScope, "OBess", "ClockTimerApp");
-#else
-    QSettings settings(Settings::Ini::FILE_PATH, QSettings::IniFormat);
-#endif // Q_OS_ANDROID
-
-#ifndef Q_OS_ANDROID
-    settings.beginGroup(Settings::Ini::MAIN_WINDOW);
-
-    settings.setValue(Settings::Ini::IS_MAXIMIZED, isMaximized());
-    settings.setValue(Settings::Ini::WIDTH, width());
-    settings.setValue(Settings::Ini::HEIGHT, height());
-    settings.setValue(Settings::Ini::POS_X, pos().x());
-    settings.setValue(Settings::Ini::POS_Y, pos().y() - 38); // 38 it is the height of title bar
-
-    settings.endGroup();
-#endif // Q_OS_ANDROID
-
     // Save history only if there is at least one item,
     // otherwise just remove group if there it is
     if (_historyModel->rowCount() == 0)
@@ -428,6 +436,33 @@ void ClockTimerApp::saveApp()
 
         settings.endGroup();
     }
+}
 
-    settings.sync();
+void ClockTimerApp::saveApp()
+{
+    QSettings settings(Settings::Ini::FILE_PATH, QSettings::IniFormat);
+
+#ifndef Q_OS_ANDROID
+    settings.beginGroup(Settings::Ini::MAIN_WINDOW);
+
+    settings.setValue(Settings::Ini::IS_MAXIMIZED, isMaximized());
+    settings.setValue(Settings::Ini::WIDTH, width());
+    settings.setValue(Settings::Ini::HEIGHT, height());
+    settings.setValue(Settings::Ini::POS_X, pos().x());
+    settings.setValue(Settings::Ini::POS_Y, pos().y() - 38); // 38 it is the height of title bar
+
+    settings.endGroup();
+#endif // Q_OS_ANDROID
+
+    saveHistory(settings);
+}
+
+void ClockTimerApp::saveAndroidApp()
+{
+    // If there are any changes in the table
+    if (_dataChanged)
+    {
+        saveApp();
+        _dataChanged = false;
+    }
 }

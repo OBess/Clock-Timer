@@ -1,8 +1,6 @@
 #ifndef CLOCKTIMERAPP_H
 #define CLOCKTIMERAPP_H
 
-#include <QKeyEvent>
-#include <QTimer>
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -15,7 +13,11 @@ namespace Ui
 class HistoryModel;
 QT_END_NAMESPACE
 
-/// @brief Extends QWidget class to show other widgets on the screen. 
+class QKeyEvent;
+class QSettings;
+class QTimer;
+
+/// @brief Extends QWidget class to show other widgets on the screen.
 /// The main object of the application
 class ClockTimerApp : public QWidget
 {
@@ -24,6 +26,9 @@ class ClockTimerApp : public QWidget
 public:
     explicit ClockTimerApp(QWidget *parent = nullptr);
     ~ClockTimerApp();
+
+public slots:
+    void onAppStateChange(Qt::ApplicationState state);
 
 private slots:
     /// @brief Updates the analog clock selected time corresponding to the digital clock
@@ -78,8 +83,15 @@ private:
     /// @brief Loads data from the .ini file and setups properties to the widget
     void setupApp();
 
-    /// @brief Saves properties of the widget to the .ini file
+    /// @brief The sub-function to save data from the history table
+    /// @param settings Where to save
+    void saveHistory(QSettings &settings);
+
+    /// @brief Saves properties of the widget and history table to the .ini file
     void saveApp();
+
+    /// @brief Check if there are any changes and call saveApp
+    void saveAndroidApp();
 
     /// @brief Generated class from .ui file
     Ui::ClockTimerApp *ui = nullptr;
@@ -90,7 +102,7 @@ private:
 
     /// @brief Timer identification for clock updates
     int _clockHandler = 0;
-    
+
     QTimer *_timer = nullptr;
 
     int _selectedMilliseconds = 0;
@@ -99,12 +111,9 @@ private:
 
     bool _timerIsExecuting = false;
 
-#ifdef Q_OS_ANDROID
-
-    int _historyTabID = 0;
-
-    int _clockTabID = 0;
-
-#endif // Q_OS_ANDROID
+    // The flag (for Android) marks if there are any changes in the table or not
+    // True was set in the functions ("insertIntervalToTable", "clearHistoryTable")
+    // False was set in the function ("saveApp")
+    bool _dataChanged = false;
 };
 #endif // CLOCKTIMERAPP_H
