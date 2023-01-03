@@ -63,8 +63,9 @@ void ClockTimerApp::onAppStateChange(Qt::ApplicationState state)
 {
 #ifdef Q_OS_ANDROID
     // When user hide application on android OS
-    if (state == Qt::ApplicationState::ApplicationInactive ||
-        state == Qt::ApplicationState::ApplicationSuspended)
+    if (state == Qt::ApplicationInactive ||
+        state == Qt::ApplicationSuspended ||
+        state == Qt::ApplicationHidden)
     {
         saveAndroidApp();
     }
