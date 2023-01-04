@@ -30,3 +30,5 @@ To save all intervals in the table and the properties of the window (only on Win
 <p align="center">
   <img src="https://user-images.githubusercontent.com/34779566/210525743-803d6b23-1be3-4eff-9deb-133ce88a2147.png" height="300" alt="The ini (save) file">
 </p>
+
+## Demonstration of application
