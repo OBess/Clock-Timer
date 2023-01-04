@@ -16,17 +16,17 @@ This project represents a clock (analog and digit) with a timer. Like a user, yo
 ## General application view
 1. Windows
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/34779566/210522171-aa16f168-29c9-46e8-8cce-f54841bfca54.png" alt="Windows application view">
+  <img src="https://user-images.githubusercontent.com/34779566/210522171-aa16f168-29c9-46e8-8cce-f54841bfca54.png" height="500" alt="Windows application view">
 </p>
 
 2. Android
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/34779566/210523696-ab8f00ac-3429-4bb4-afc9-55852160f0ab.png" height="700" alt="Android first tab of application view">
-  <img src="https://user-images.githubusercontent.com/34779566/210524084-360100c2-7a7f-44ad-bdac-14ca00439754.png" height="700" alt="Android second tab of application view">
+  <img src="https://user-images.githubusercontent.com/34779566/210523696-ab8f00ac-3429-4bb4-afc9-55852160f0ab.png" height="500" alt="Android first tab of application view">
+  <img src="https://user-images.githubusercontent.com/34779566/210524084-360100c2-7a7f-44ad-bdac-14ca00439754.png" height="500" alt="Android second tab of application view">
 </p>
 
 ## Saving
 To save all intervals in the table and the properties of the window (only on Windows), I use QSettings, where I keep data nearby to a .exe file and in .ini format:
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/34779566/210525743-803d6b23-1be3-4eff-9deb-133ce88a2147.png" alt="The ini (save) file">
+  <img src="https://user-images.githubusercontent.com/34779566/210525743-803d6b23-1be3-4eff-9deb-133ce88a2147.png" height="300" alt="The ini (save) file">
 </p>
