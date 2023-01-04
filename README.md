@@ -10,4 +10,7 @@ The application for practicing work with Qt-framework
 - Version of Gradle - 7.0.0
 - Version of C++ - 17
 
+## A brief review of the project
+
+
 ## Functional of application
