@@ -19,10 +19,11 @@ This project represents a clock (analog and digit) with a timer. Like a user, yo
   <img src="https://user-images.githubusercontent.com/34779566/210522171-aa16f168-29c9-46e8-8cce-f54841bfca54.png" height="350" alt="Windows application view">
 </p>
 
-2. Android - first tab
-
-
-3. Android - second tab
+2. Android
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/34779566/210523696-ab8f00ac-3429-4bb4-afc9-55852160f0ab.png" height="350" alt="Android first tab of application view">
+  <img src="https://user-images.githubusercontent.com/34779566/210524084-360100c2-7a7f-44ad-bdac-14ca00439754.png" height="350" alt="Android second tab of application view">
+</p>
 
 ## Functional of application
 1. Windows - 
