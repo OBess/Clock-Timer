@@ -15,8 +15,9 @@ This project represents a clock (analog and digit) with a timer. Like a user, yo
 
 ## General application view
 1. Windows
-![Windows application view](https://user-images.githubusercontent.com/34779566/210522171-aa16f168-29c9-46e8-8cce-f54841bfca54.png)
-<img src="[https://your-image-url.type](https://user-images.githubusercontent.com/34779566/210522171-aa16f168-29c9-46e8-8cce-f54841bfca54.png)" width="100" height="100">
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/34779566/210522171-aa16f168-29c9-46e8-8cce-f54841bfca54.png" height="350" alt="Windows application view">
+</p>
 
 2. Android - first tab
 
