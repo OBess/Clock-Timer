@@ -32,4 +32,7 @@ To save all intervals in the table and the properties of the window (only on Win
 </p>
 
 ## Demonstration of application
-![Gif - Demonstration of application](https://user-images.githubusercontent.com/34779566/210528258-73732432-ad5f-4dfd-a0e1-ce07ad03e7a1.gif)
+(Grid through a small picture)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/34779566/210528258-73732432-ad5f-4dfd-a0e1-ce07ad03e7a1.gif" height="400" alt="Gif - Demonstration of application">
+</p>
