@@ -1,7 +1,7 @@
 #ifndef CLOCKTIMERAPP_H
 #define CLOCKTIMERAPP_H
 
-#include <QWidget>
+#include <QObject>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -19,12 +19,14 @@ class QTimer;
 
 /// @brief Extends QWidget class to show other widgets on the screen.
 /// The main object of the application
-class ClockTimerApp : public QWidget
+class ClockTimerApp : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(HistoryModel historyModel READ getHistoryModel)
+
 public:
-    explicit ClockTimerApp(QWidget *parent = nullptr);
+    explicit ClockTimerApp(QObject *parent = nullptr);
     ~ClockTimerApp();
 
 public slots:
@@ -50,13 +52,15 @@ private slots:
 
     void stopTimer(bool withTimeout);
 
+    const HistoryModel &getHistoryModel() const;
+
 private:
     void timerEvent(QTimerEvent *event) override;
 
     /// @brief Clears the state of the widget when pressing
     /// the "Escape" keyboard button
     /// @param event QKeyEvent
-    void keyPressEvent(QKeyEvent *event) override;
+//    void keyPressEvent(QKeyEvent *event) override;
 
     /// @brief Gets time and sets it to like an interval into the table
     /// @param time QTime
@@ -93,6 +97,7 @@ private:
     /// @brief Check if there are any changes and call saveApp
     void saveAndroidApp();
 
+private:
     /// @brief Generated class from .ui file
     Ui::ClockTimerApp *ui = nullptr;
 

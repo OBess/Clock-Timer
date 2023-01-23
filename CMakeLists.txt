@@ -21,6 +21,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
 set(CMAKE_AUTOUIC_SEARCH_PATHS design)
 
 file(GLOB_RECURSE src include/*.h src/*.cpp design/*.ui resources/*.qrc *.rc)
+#file(GLOB_RECURSE src design/*.ui resources/*.qrc *.rc)
 
 set(PROJECT_SOURCES
         main.cpp

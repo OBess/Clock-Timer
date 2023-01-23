@@ -2,9 +2,9 @@
 #include "./ui_clocktimerapp.h"
 
 #include <QKeyEvent>
-#include <QLineEdit>
+//#include <QLineEdit>
 #include <QScreen>
-#include <QScroller>
+//#include <QScroller>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
@@ -16,10 +16,10 @@
 #include "int_range_validator.h"
 #include "utils.h"
 
-ClockTimerApp::ClockTimerApp(QWidget *parent)
-    : QWidget(parent), ui(new Ui::ClockTimerApp)
+ClockTimerApp::ClockTimerApp(QObject *parent)
+    : QObject(parent), ui(new Ui::ClockTimerApp)
 {
-    ui->setupUi(this);
+//    ui->setupUi(this);
 
     _clockHandler = QObject::startTimer(50);
     _timer = new QTimer(this);
@@ -44,20 +44,20 @@ void ClockTimerApp::timerEvent(QTimerEvent *event)
 {
     if (event->timerId() == _clockHandler)
     {
-        if (isEnabled())
-        {
-            updateClocks();
-        }
+//        if (isEnabled())
+//        {
+//            updateClocks();
+//        }
     }
 }
 
-void ClockTimerApp::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Escape)
-    {
-        unselect();
-    }
-}
+//void ClockTimerApp::keyPressEvent(QKeyEvent *event)
+//{
+//    if (event->key() == Qt::Key_Escape)
+//    {
+//        unselect();
+//    }
+//}
 
 void ClockTimerApp::onAppStateChange(Qt::ApplicationState state)
 {
@@ -243,7 +243,7 @@ void ClockTimerApp::setupUi()
 
     // Create and set History model to History table
     _historyModel = new HistoryModel(this);
-    ui->table_history->setModel(_historyModel);
+//    ui->table_history->setModel(_historyModel);
 
     // Setup validator to line editos that represent digital clock
     ui->le_hour->setValidator(new IntRangeValidator(0, 11, this));
@@ -332,7 +332,7 @@ void ClockTimerApp::setupStyle()
             return;
 
         QTextStream in(&file);
-        setStyleSheet(in.readAll());
+//        setStyleSheet(in.readAll());
     }
 }
 
@@ -345,38 +345,38 @@ void ClockTimerApp::setupApp()
 
     if (settings.value(Settings::Ini::IS_MAXIMIZED, false).toBool())
     {
-        showMaximized();
+//        showMaximized();
     }
     else
     {
-        resize(settings.value(Settings::Ini::WIDTH, 640).toInt(),
-               settings.value(Settings::Ini::HEIGHT, 480).toInt());
+//        resize(settings.value(Settings::Ini::WIDTH, 640).toInt(),
+//               settings.value(Settings::Ini::HEIGHT, 480).toInt());
 
         // Keep the application in the screen area
-        const QSize screenSize = screen()->size();
+//        const QSize screenSize = screen()->size();
 
         int pos_x = settings.value(Settings::Ini::POS_X, 0).toInt();
         int pos_y = settings.value(Settings::Ini::POS_Y, 0).toInt();
 
-        if (pos_x + width() > screenSize.width())
-        {
-            pos_x = screenSize.width() - width();
-        }
-        else if (pos_x < 0)
-        {
-            pos_x = 0;
-        }
+//        if (pos_x + width() > screenSize.width())
+//        {
+//            pos_x = screenSize.width() - width();
+//        }
+//        else if (pos_x < 0)
+//        {
+//            pos_x = 0;
+//        }
 
-        if (pos_y + height() > screenSize.height())
-        {
-            pos_y = screenSize.height() - height();
-        }
-        else if (pos_y < 0)
-        {
-            pos_y = 0;
-        }
+//        if (pos_y + height() > screenSize.height())
+//        {
+//            pos_y = screenSize.height() - height();
+//        }
+//        else if (pos_y < 0)
+//        {
+//            pos_y = 0;
+//        }
 
-        move(pos_x, pos_y);
+//        move(pos_x, pos_y);
     }
 
     settings.endGroup();
@@ -391,15 +391,15 @@ void ClockTimerApp::setupApp()
     {
         settings.setArrayIndex(i);
 
-        _historyModel->insertRow(_historyModel->rowCount());
+//        _historyModel->insertRow(_historyModel->rowCount());
 
         const int row = _historyModel->rowCount() - 1;
 
-        _historyModel->setData(_historyModel->index(row, 0),
-                               settings.value(Settings::Ini::DATETIME, Settings::Ini::INVALID).toString());
+//        _historyModel->setData(_historyModel->index(row, 0),
+//                               settings.value(Settings::Ini::DATETIME, Settings::Ini::INVALID).toString());
 
-        _historyModel->setData(_historyModel->index(row, 1),
-                               settings.value(Settings::Ini::INTERVAL, Settings::Ini::INVALID).toString());
+//        _historyModel->setData(_historyModel->index(row, 1),
+//                               settings.value(Settings::Ini::INTERVAL, Settings::Ini::INVALID).toString());
     }
 
     settings.endArray();
@@ -425,11 +425,11 @@ void ClockTimerApp::saveHistory(QSettings &settings)
         {
             settings.setArrayIndex(i);
 
-            settings.setValue(Settings::Ini::DATETIME,
-                              _historyModel->data(_historyModel->index(i, 0)).toString());
+//            settings.setValue(Settings::Ini::DATETIME,
+//                              _historyModel->data(_historyModel->index(i, 0)).toString());
 
-            settings.setValue(Settings::Ini::INTERVAL,
-                              _historyModel->data(_historyModel->index(i, 1)).toString());
+//            settings.setValue(Settings::Ini::INTERVAL,
+//                              _historyModel->data(_historyModel->index(i, 1)).toString());
         }
 
         settings.endArray();
@@ -445,11 +445,11 @@ void ClockTimerApp::saveApp()
 #ifndef Q_OS_ANDROID
     settings.beginGroup(Settings::Ini::MAIN_WINDOW);
 
-    settings.setValue(Settings::Ini::IS_MAXIMIZED, isMaximized());
-    settings.setValue(Settings::Ini::WIDTH, width());
-    settings.setValue(Settings::Ini::HEIGHT, height());
-    settings.setValue(Settings::Ini::POS_X, pos().x());
-    settings.setValue(Settings::Ini::POS_Y, pos().y() - 38); // 38 it is the height of title bar
+//    settings.setValue(Settings::Ini::IS_MAXIMIZED, isMaximized());
+//    settings.setValue(Settings::Ini::WIDTH, width());
+//    settings.setValue(Settings::Ini::HEIGHT, height());
+//    settings.setValue(Settings::Ini::POS_X, pos().x());
+//    settings.setValue(Settings::Ini::POS_Y, pos().y() - 38); // 38 it is the height of title bar
 
     settings.endGroup();
 #endif // Q_OS_ANDROID
@@ -465,4 +465,9 @@ void ClockTimerApp::saveAndroidApp()
         saveApp();
         _dataChanged = false;
     }
+}
+
+const HistoryModel &ClockTimerApp::getHistoryModel() const
+{
+    return *_historyModel;
 }

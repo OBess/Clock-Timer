@@ -19,7 +19,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-//#include "clock_timer_app.h"
+#include "clock_timer_app.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     // Registers classes types
-
+    qmlRegisterType<ClockTimerApp>("ClockTimerApp.ClockTimerApp", 1, 0, "ClockTimerApp");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
