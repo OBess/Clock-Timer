@@ -15,16 +15,16 @@ if(ANDROID)
     set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
 endif()
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS design)
 
-file (GLOB_RECURSE found_src include/*.h src/*.cpp design/*.ui resources/*.qrc *.rc)
+file(GLOB_RECURSE src include/*.h src/*.cpp design/*.ui resources/*.qrc *.rc)
 
 set(PROJECT_SOURCES
         main.cpp
-        ${found_src}
+        ${src}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -48,8 +48,8 @@ else()
     endif()
 endif()
 
+target_link_libraries(ClockTimerApp PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
 target_include_directories(ClockTimerApp PRIVATE include)
-target_link_libraries(ClockTimerApp PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 set_target_properties(ClockTimerApp PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
